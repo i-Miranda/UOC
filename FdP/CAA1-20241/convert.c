@@ -5,29 +5,14 @@
  * and converts and outputs it to a Kelvin temperature value.
  */
 
-
-
-
-/* -------------------------------*/
-
 /* System header files */
 #include <stdio.h>
 
-
-
-
-
-
-/* -------------------------------*/ 
-
 /* Symbolic constants */
-
 #define F_FREEZE_POINT 32
-#define FIVE_NINTHS 5/9
+/* 5.0/9.0 equals 0.555556 */
+#define FIVE_NINTHS 0.555556 
 #define K_FREEZE_POINT 273.15
-
-
-/* -------------------------------*/
 
 /* Predeclaration of actions and functions */
 float requestInput(void);
@@ -35,8 +20,6 @@ float convertFToC(float fahrenheit);
 float convertCToK(float celsius);
 float convertFToK(float fahrenheit);
 void printK(float kelvin);
-
-/* -------------------------------*/
 
 /* Main function */
 int main(int argc, char **argv){
@@ -49,10 +32,7 @@ int main(int argc, char **argv){
 	return 0;
 }
 
-/* -------------------------------*/ 
-
 /* Implementation of actions and functions */
-
 float requestInput(void){
 	float fahrenheit;
 	printf("INPUT\nFAHRENHEIT DEGREES?\n");
@@ -75,10 +55,11 @@ float convertCToK(float celsius){
 }
 
 float convertFToK(float fahrenheit){
-	float kelvin;
-
-	kelvin = (fahrenheit - F_FREEZE_POINT) * FIVE_NINTHS + K_FREEZE_POINT;
-	return kelvin;
+	float conversion;
+	
+	conversion = convertFToC(fahrenheit);
+	conversion = convertCToK(conversion);
+	return conversion;
 }
 
 void	printK(float kelvin){
