@@ -9,9 +9,11 @@
 #include <stdio.h>
 
 /* Symbolic constants */
+/* Fahrenheit freezing point of water */
 #define F_FREEZE_POINT 32
 /* 5.0/9.0 equals 0.555556 */
-#define FIVE_NINTHS 0.555556 
+#define FIVE_NINTHS 0.555556
+/* Kelvin freezing point of water */
 #define K_FREEZE_POINT 273.15
 
 /* Predeclaration of actions and functions */
