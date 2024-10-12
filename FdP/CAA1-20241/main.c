@@ -23,7 +23,7 @@ int main(int argc, char **argv){
 	float kelvin;
 
 	printf("INPUT\nFAHRENHEIT DEGREES?\n");
-	scanf("%2f", &fahrenheit);
+	scanf("%f", &fahrenheit);
 	celsius = (fahrenheit - F_FREEZE_POINT) * FIVE_NINTHS;
 	kelvin = celsius + K_FREEZE_POINT;
 	printf("OUTPUT\nKELVIN: %.2f\n", kelvin);
