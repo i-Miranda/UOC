@@ -7,32 +7,70 @@
 
 /* System header files */
 #include <stdio.h>
+#include <string.h>
 
 /* Symbolic constants */
-/* MATRIX types that are not UPPER TRIANGLE */
-#define OTHER_MATRIX 0
-/* UPPER TRIANGLE MATRIX type*/
-#define UT_MATRIX 1 
-/* STRICTLY UPPER TRIANGLE MATRIX type*/
-#define STRICT_UT_MATRIX 2 
+/* MATRIX dimensions */
+#define MAX_ROWS 3
+/* Max columns is 4 for Null-terminator*/
+#define MAX_COLS 4
+/* Null-terminated string of zeroes */
+#define THREE_ZEROES "000\0"
+
+/* MATRIX types */
+typedef enum {STRICT, UPPER, OTHER} matrixType;
 
 /* Main function */
 int main(int argc, char **argv){
 	FILE* testData;
-	char matrixData[13];
-	int	result;
+	char matrixData[MAX_ROWS][MAX_COLS];
+	char strictTri[MAX_COLS];
+	char upperTri[MAX_COLS];
+	matrixType matrix;
 
 	testData = fopen("test.data", "r");
-	fscanf(testData, "%s", matrixData);
-	printf("%s\n", matrixData);
-	printf("OUTPUT\n");
-	if (result == OTHER_MATRIX){
-		printf("OTHER MATRIX TYPE\n");
-	} else {
-		if (result == UT_MATRIX){
-			printf("UPPER TRIANGLE MATRIX\n");
-		} else {
-			printf("STRICTLY UPPER TRIANGLE MATRIX\n");
+	matrix = STRICT;
+	strcpy(matrixData[0], THREE_ZEROES);
+	strcpy(matrixData[1], THREE_ZEROES);
+	strcpy(matrixData[2], THREE_ZEROES);
+	strcpy(strictTri, THREE_ZEROES);
+	strcpy(upperTri, THREE_ZEROES);
+
+	fscanf(testData, "%s", &matrixData[0][0]);
+	fscanf(testData, "%s", &matrixData[0][1]);
+	fscanf(testData, "%s", &matrixData[0][2]);
+	fscanf(testData, "%s", &matrixData[1][0]);
+	fscanf(testData, "%s", &matrixData[1][1]);
+	fscanf(testData, "%s", &matrixData[1][2]);
+	fscanf(testData, "%s", &matrixData[2][0]);
+	fscanf(testData, "%s", &matrixData[2][1]);
+	fscanf(testData, "%s", &matrixData[2][2]);
+	
+	strictTri[0] = matrixData[0][0];
+	strictTri[1] = matrixData[1][1];
+	strictTri[2] = matrixData[2][2];
+	upperTri[0] = matrixData[1][0];
+	upperTri[1] = matrixData[2][1];
+	upperTri[2] = matrixData[2][0];
+
+	if (strcmp(strictTri, THREE_ZEROES) != 0){ 
+		matrix = UPPER;
 	}
-	return fclose(testData);
+	if (strcmp(upperTri, THREE_ZEROES) != 0){
+		matrix = OTHER;
+	}
+
+	printf("OUTPUT\n");
+	if (matrix == STRICT){
+		printf("STRICTLY UPPER TRIANGULAR MATRIX\n");
+	} else {
+		if (matrix == UPPER){
+			printf("UPPER TRIANGULAR MATRIX\n");
+		} else {
+			printf("OTHER MATRIX TYPE\n");
+		}
+	}
+
+	fclose(testData);
+	return 0;
 }
