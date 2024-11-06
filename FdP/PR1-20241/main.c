@@ -108,11 +108,11 @@ int main(int argc, char **argv){
 		for(i = 0; i < NUM_ACTIVITIES; i++){
 			/* if failedGrades[i] >= 0.0 it's been recorded as a failed grade */
 			if (failedGrades[i] >= MIN_D && failedGrades[i] < MIN_C_PLUS){
-				printf("ACTIVITY ID: #%d\nACTIVITY GRADE: %.2f\n", i + 1, failedGrades[i]);
+				printf("ACTIVITY ID: #%d\nACTIVITY GRADE: %.2f", i + 1, failedGrades[i]);
 			}
 		}
 	} else {
-		printf("NO GRADES BELOW C_PLUS.\n");
+		printf("NO GRADES BELOW C_PLUS.");
 	}
 
 	return 0;
