@@ -94,7 +94,6 @@ algorithm Grade
 
 	{Identify activities with grades below C+ and update failed grades count}
 	for i := 0 to NUM_ACTIVITIES do
-		{if failedGrades[i] >= 0.0 it's been recorded as a failed grade} 
 		if activityGrade[i] < MIN_C_PLUS then
 			failedGrades[i] = activityGrade[i];			
 			failedGradesCount++;
@@ -113,6 +112,7 @@ algorithm Grade
 	if failedGradesCount > 0 then
 		writeString("GRADES BELOW C_PLUS:");
 		for i := 0 to NUM_ACTIVITIES do
+			{if failedGrades[i] >= 0.0 it's been recorded as a failed grade} 
 			if failedGrades[i] >= MIN_D and failedGrades[i] < MIN_C_PLUS then
 				writeString("ACTIVITY ID: #");
 				writeInteger(i + 1);
