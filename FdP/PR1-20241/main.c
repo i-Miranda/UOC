@@ -10,6 +10,7 @@
 
 /* Symbolic constants */
 #define NUM_ACTIVITIES 5 	/* The number of activities used to calculate the student's average */
+#define MIN_D 0.0 			/* Minimum number grade acquireable (NO NEGATIVE NUMBERS) */
 #define MIN_C_MINUS 3.0 	/* Minimum number grade to acquire a C- */
 #define MIN_C_PLUS 5.0 		/* Minimum number grade to acquire a C+ */
 #define MIN_B 7.0 			/* Minimum number grade to acquire a B */
@@ -57,12 +58,18 @@ int main(int argc, char **argv){
 	/* Calculate the sum of all grades */
 	/* Store the highest and lowest grades */ 
 	for(i = 0; i < NUM_ACTIVITIES; i++){
-		finalGPA += activityGrade[i];
-		if (bestGrade < activityGrade[i]){
-			bestGrade = activityGrade[i];
+		if (activityGrade[i] > MAX_A){		/* Check if grade is above 10.0 */
+			activityGrade[i] = MAX_A;		/* Set to 10.0 */
 		}
-		if (worstGrade > activityGrade[i]){
-			worstGrade = activityGrade[i];
+		if (activityGrade[i] < MIN_D){		/* Check if grade is below 0.0 */
+			activityGrade[i] = MIN_D;		/* Set to 0.0 */
+		}
+		finalGPA += activityGrade[i];
+		if (bestGrade < activityGrade[i]){	/* Check grade is above bestGrade */
+			bestGrade = activityGrade[i];	/* Set bestGrade */
+		}
+		if (worstGrade > activityGrade[i]){ /* Check grade is below worstGrade */
+			worstGrade = activityGrade[i];	/* Set worstGrade */
 		}
 	}
 
@@ -100,8 +107,9 @@ int main(int argc, char **argv){
 	if (failedGradesCount > 0) {
 		printf("GRADES BELOW C_PLUS:\n");
 		for(i = 0; i < NUM_ACTIVITIES; i++){
-			if (failedGrades[i] >= 0.0 && failedGrades[i] < MIN_C_PLUS){
-				printf("ACTIVITY ID: #%d\n%.2f\n", i + 1, failedGrades[i]);
+			/* if failedGrades[i] >= 0.0 it's been recorded as a failed grade */
+			if (failedGrades[i] >= MIN_D && failedGrades[i] < MIN_C_PLUS){
+				printf("ACTIVITY ID: #%d\nACTIVITY GRADE: %.2f\n", i + 1, failedGrades[i]);
 			}
 		}
 	} else {
