@@ -7,7 +7,6 @@
 
 /* System header files */
 #include <stdio.h>
-
 /* Symbolic constants */
 #define NUM_ACTIVITIES 5 	/* The number of activities used to calculate the student's average */
 #define MIN_D 0.0 			/* Minimum number grade acquireable (NO NEGATIVE NUMBERS) */
@@ -78,16 +77,16 @@ int main(int argc, char **argv){
 
 	/* Determine the final grade based on the average */
 	if (finalGPA >= MIN_C_MINUS){
-		finalGrade--;
+		finalGrade = C_MINUS;
 	}
 	if (finalGPA >= MIN_C_PLUS){
-		finalGrade--;
+		finalGrade = C_PLUS;
 	}
 	if (finalGPA >= MIN_B){
-		finalGrade--;
+		finalGrade = B;
 	}
 	if (finalGPA >= MIN_A){
-		finalGrade--;
+		finalGrade = A;
 	}
 
 	/* Identify activities with grades below C+ and update failed grades count*/
