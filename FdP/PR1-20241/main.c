@@ -49,7 +49,7 @@ int main(int argc, char **argv){
 
 	/* Input the grades */
 	for(i = 1; i <= NUM_ACTIVITIES; i++){
-		printf("Activity ID #%d\nGRADE (A REAL)?\n", i);
+		printf("ACTIVITY ID #%d\nGRADE (A REAL)?\n", i);
 		scanf("%f", &activityGrade[i - 1]);
 	}
 
@@ -108,7 +108,7 @@ int main(int argc, char **argv){
 		for(i = 0; i < NUM_ACTIVITIES; i++){
 			/* if failedGrades[i] >= 0.0 it's been recorded as a failed grade */
 			if (failedGrades[i] >= MIN_D && failedGrades[i] < MIN_C_PLUS){
-				printf("ACTIVITY ID: #%d\nACTIVITY GRADE: %.2f", i + 1, failedGrades[i]);
+				printf("ACTIVITY ID: #%d\nACTIVITY GRADE: %.2f\n", i + 1, failedGrades[i]);
 			}
 		}
 	} else {
