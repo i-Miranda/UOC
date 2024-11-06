@@ -9,52 +9,43 @@
 #include <stdio.h>
 
 /* Symbolic constants */
-/* The number of activities used to calculate the student's average */
-#define NUM_ACTIVITIES 5
-/* Minimum number grade to acquire a C- */
-#define MIN_C_MINUS 3.0
-/* Minimum number grade to acquire a C+ */
-#define MIN_C_PLUS 5.0 
-/* Minimum number grade to acquire a B */
-#define MIN_B 7.0
-/* Minimum number grade to acquire a A */
-#define MIN_A 9.0 
-/* Maximuym number grade to acquire a A */
-#define MAX_A 10.0 
+#define NUM_ACTIVITIES 5 	/* The number of activities used to calculate the student's average */
+#define MIN_C_MINUS 3.0 	/* Minimum number grade to acquire a C- */
+#define MIN_C_PLUS 5.0 		/* Minimum number grade to acquire a C+ */
+#define MIN_B 7.0 			/* Minimum number grade to acquire a B */
+#define MIN_A 9.0 			/* Minimum number grade to acquire a A */
+#define MAX_A 10.0 			/* Maximum number grade to acquire a A */
 
 /* An enum representing letter grades */
 typedef enum {A, B, C_PLUS, C_MINUS, D} tGrades;
 
 /* Main function */
 int main(int argc, char **argv){
-	/* Iteration Variable */
-	int	i;
-	/* Count of failed grades */
-	int	failedGradesCount;
-	/* Activity grades */
-	float activityGrade[NUM_ACTIVITIES];
-	/* Grades below C+ */
-	float failedGrades[NUM_ACTIVITIES];
-	/* Final grade point average */
-	float finalGPA;
-	/* Highest grade attained */
-	float bestGrade;
-	/* Lowest grade attained */
-	float worstGrade;
-	/* Final grade based on average */
-	tGrades finalGrade;
+	/* Variable Definitions */
+	float activityGrade[NUM_ACTIVITIES]; 	/* Activity grades */
+	float failedGrades[NUM_ACTIVITIES]; 	/* Grades below C+ */
+	int	failedGradesCount; 					/* Count of failed grades */
+	int	i; 									/* Iteration Variable */
+	tGrades finalGrade; 					/* Final grade based on average */
 
+	float finalGPA; 						/* Final grade point average */
+	float bestGrade;						/* Highest grade attained */
+	float worstGrade;						/* Lowest grade attained */
+
+	/* Data Input */
 	/* Initializing the variables */	
-	i = 0;
-	failedGradesCount = 0;
 	for(i = 0; i < NUM_ACTIVITIES; i++){
 		activityGrade[i] = 0.0;
 		failedGrades[i] = -1.0;
 	}
+
+	failedGradesCount = 0;
+	i = 0;
+	finalGrade = D;
+
 	finalGPA = 0.0;
 	bestGrade = 0.0;
 	worstGrade = 10.0;
-	finalGrade = D;
 
 	/* Input the grades */
 	for(i = 1; i <= NUM_ACTIVITIES; i++){
@@ -63,7 +54,7 @@ int main(int argc, char **argv){
 	}
 
 	/* Data processing */
-	/* Calculate the sum of all grades. */
+	/* Calculate the sum of all grades */
 	/* Store the highest and lowest grades */ 
 	for(i = 0; i < NUM_ACTIVITIES; i++){
 		finalGPA += activityGrade[i];

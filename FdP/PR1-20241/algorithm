@@ -1,0 +1,112 @@
+const
+	NUM_ACTIVITIES: integer = 5; {Number of activities}
+	MIN_C_MINUS: real = 3.0; {Minimum mark for grade C-}
+	MIN_C_PLUS: real = 5.0; {Minimum mark for grade C+}
+	MIN_B: real = 7.0; {Minimum mark for grade B}
+	MIN_A: real = 9.0; {Minimum mark for grade A}
+	MAX_A: real = 10.0; {Maximum mark for grade A}
+end const
+
+type
+	tGrades = {A, B, C_PLUS, C_MINUS, D}
+end type
+
+algorithm Grade
+	{Variable Definitions}
+	var
+
+		activityGrade: vector[NUM_ACTIVITIES] of real; {Activity grades}
+		failedGrades: vector[NUM_ACTIVITIES] of real; {Grades below C+}
+		failedGradesCount: integer; {Count of failed grades}
+		i: integer;					{Iteration Variable}
+		finalGrade: tGrades;		{Final grade based on average}
+
+		finalGPA: real;				{Final grade point average}
+		bestGrade: real; 			{Highest grade attained}
+		worstGrade: real; 			{Lowest grade attained}
+
+	end var
+
+	{Data Input}
+	{Initializing the variables}	
+	for i := 0 to NUM_ACTIVITIES do
+		activityGrade[i] := 0.0;
+		failedGrades[i] := -1.0;
+	end for
+
+	failedGradesCount := 0;
+	i := 0;
+	finalGrade := D;
+
+	finalGPA := 0.0;
+	bestGrade := 0.0;
+	worstGrade := 10.0;
+
+	{Input the grades}
+	for i := 1 to NUM_ACTIVITIES do
+		writeString("Activity ID #");
+		writeInteger(i);
+		writeString("GRADE (A REAL)?");
+		activityGrade[i] := readReal();
+	end for
+
+	{Data processing} 
+	{Calculate the sum of all grades}
+	{Store the highest and lowest grades}
+	for i := 0 to NUM_ACTIVITIES do
+		finalGPA += activityGrade[i];
+		if bestGrade < activityGrade[i] then
+			bestGrade = activityGrade[i];
+		end if
+		if worstGrade > activityGrade[i] then
+			worstGrade = activityGrade[i];
+		end if
+	end for
+
+	{Calculate the final grade point average} 
+	finalGPA := finalGPA/integerToReal(NUM_ACTIVITIES);	
+
+	{Determine the final grade based on the average} 
+	if finalGPA >= MIN_C_MINUS then
+		finalGrade--;
+	end if
+	if finalGPA >= MIN_C_PLUS then
+		finalGrade--;
+	end if
+	if finalGPA >= MIN_B then
+		finalGrade--;
+	end if
+	if finalGPA >= MIN_A then
+		finalGrade--;
+	end if
+
+	{Identify activities with grades below C+ and update failed grades count}
+	for i := 0 to NUM_ACTIVITIES do
+		if activityGrade[i] < MIN_C_PLUS then
+			failedGrades[i] = activityGrade[i];			
+			failedGradesCount++;
+		end if
+	end for
+
+	{Data output}
+	writeString("FINAL GRADE (1-A, 2-B, 3-C_PLUS, 4-C_MINUS, 5-D): ");
+	writeInteger(finalGrade + 1);
+	writeString("BEST GRADE: ");
+	writeReal(bestGrade);
+	writeString("WORST GRADE: ");
+	writeReal(worstGrade);
+
+	{Display grades below C+} 
+	if failedGradesCount > 0 then
+		writeString("GRADES BELOW C_PLUS:");
+		for i := 0 to NUM_ACTIVITIES do
+			if failedGrades[i] >= 0.0 && failedGrades[i] < MIN_C_PLUS then
+				writeString("ACTIVITY ID: #);
+				writeInteger(i + 1);
+				writeReal(failedGrades[i]);
+			end if
+		end for
+	else 
+		writeString("NO GRADES BELOW C_PLUS.");
+	end if	
+end algorithm
