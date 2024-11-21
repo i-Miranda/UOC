@@ -77,11 +77,9 @@ int main(int argc, char **argv)
 		/* Exercise 3 */
 		printf ("\nRESULTS:\n");		
 		for(i = 0; i < studentCount; i++){
-			mark = getFinalGPA(students[studentCount]);
+			mark = getFinalGPA(students[i]);
 			grade = getFinalGrade(mark);
-			writeStudentData(students[studentCount], mark, grade);	
-			printf();
-			printf();
+			writeStudentData(students[i], mark, grade);	
 		}
 		/* ... */
 		
@@ -91,8 +89,17 @@ int main(int argc, char **argv)
 		scanf("%d", &studentId);
 		
 		/* Search student by ID */
+		found = false;
+		for (i = 0; i < studentCount; i++){
+			if (students[i].studentId == studentId){
+				writeStudentActivities(students[i]);
+				found = true;	
+			}
+		}
+		if (found == false){
+			printf("STUDENT NOT FOUND\n");
+		}
 		/* ... */
-		
 	}
 	else {
 		/* No data recovered */
@@ -214,18 +221,16 @@ void writeStudentActivities (tStudent student) {
 /* Exercise 1 */
 float getFinalGPA(tStudent student){
 	float finalGPA;
-	
+	int	i;
+
 	finalGPA = 0;
 	for(i = 0; i < NUM_ACTIVITIES; i++){
 		if (student.activities[i].activityType == CAA){
-			finalGPA += student.activities[i].activityMark / (float)CAA_WEIGHT;
+			finalGPA += student.activities[i].activityMark * (float)((float)CAA_WEIGHT/(float)100);
 		} else {
-			finalGPA += student.activities[i].activityMark / (float)PR_WEIGHT;
+			finalGPA += student.activities[i].activityMark * (float)((float)PR_WEIGHT/(float)100);
 		}
 	}
-
-	finalGPA /= (float)NUM_ACTIVITIES;
-
 	return finalGPA;
 }
 
