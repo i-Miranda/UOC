@@ -26,6 +26,7 @@
 
 #define CAA_WEIGHT 10			/*	Percent weight of each CAA in the final grade	*/
 #define PR_WEIGHT  20			/*	Percent weight of each PR in the final grade	*/
+#define PERCENT   100			/*	100%, used to with *_WEIGHT variables			*/
 
 
 /* User defined types */
@@ -33,22 +34,22 @@ typedef enum {A = 1, B, C_PLUS, C_MINUS, D} tGrade;
 typedef enum {CAA = 1, PR} tActivityType;
 
 typedef struct {
-	float activityMark;          /* Activity Mark */
-	tActivityType activityType;  /* Activity Type */
+	float activityMark;						/* Activity Mark */
+	tActivityType activityType;				/* Activity Type */
 }tActivity;
 
-typedef struct {   
-    int studentId;                          /* Student ID */               
-    char name[MAX_NAME_LENGTH];             /* Student Name */
-    tActivity activities [NUM_ACTIVITIES];  /* Student Activities */
+typedef struct {
+    int studentId;							/* Student ID */               
+    char name[MAX_NAME_LENGTH];				/* Student Name */
+    tActivity activities [NUM_ACTIVITIES];	/* Student Activities */
 } tStudent;
 
-/* Functions prototypes declaration for auxiliary functions */
+/* Function prototype declarations for auxiliary functions */
 void studentsLoadDataFromFile(const char* filename, tStudent students[],int *studentCount, bool *isRead);
 void writeStudentData (tStudent student, float mark, tGrade grade);
 void writeStudentActivities (tStudent student);
 
-/* Functions prototypes declaration for exercises */
+/* Function prototype declarations for exercises */
 float getFinalGPA(tStudent student); /* Exercise 1 */
 tGrade getFinalGrade(float finalGPA); /* Exercise 2 */
 
@@ -71,9 +72,9 @@ int main(int argc, char **argv)
     printf("LOAD DATA FROM FILE. ENTER FILE NAME >>\n");
     scanf("%s", filename);	
     studentsLoadDataFromFile(filename, students, &studentCount, &isRead);	
-	
-	if (isRead) { /* Data successfully loaded */
-	
+
+	/* Data successfully loaded */
+	if (isRead) { 
 		/* Exercise 3 */
 		printf ("\nRESULTS:\n");		
 		for(i = 0; i < studentCount; i++){
@@ -81,7 +82,6 @@ int main(int argc, char **argv)
 			grade = getFinalGrade(mark);
 			writeStudentData(students[i], mark, grade);	
 		}
-		/* ... */
 		
 		/* Exercise 4 */
 		/* Select a student by ID and list all his activities*/
@@ -99,13 +99,11 @@ int main(int argc, char **argv)
 		if (found == false){
 			printf("STUDENT NOT FOUND\n");
 		}
-		/* ... */
 	}
 	else {
 		/* No data recovered */
 		printf("NO STUDENTS RECOVERED\n");	
 	}
-		
 	return 0;
 }
 
@@ -226,9 +224,9 @@ float getFinalGPA(tStudent student){
 	finalGPA = 0;
 	for(i = 0; i < NUM_ACTIVITIES; i++){
 		if (student.activities[i].activityType == CAA){
-			finalGPA += student.activities[i].activityMark * (float)((float)CAA_WEIGHT/(float)100);
+			finalGPA += student.activities[i].activityMark * (float)CAA_WEIGHT/PERCENT;
 		} else {
-			finalGPA += student.activities[i].activityMark * (float)((float)PR_WEIGHT/(float)100);
+			finalGPA += student.activities[i].activityMark * (float)PR_WEIGHT/PERCENT;
 		}
 	}
 	return finalGPA;
@@ -250,6 +248,3 @@ tGrade getFinalGrade(float finalGPA){
 
 	return finalGrade;
 }
-/* ... */
-
-
