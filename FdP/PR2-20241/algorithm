@@ -41,9 +41,11 @@ function getFinalGPA(student: tStudent): real
 	finalGPA := 0;
 	for i = 0 to NUM_ACTIVITIES do
 		if student.activities[i].activityType = CAA then
-			finalGPA = finalGPA + student.activities[i].activityMark * integerToReal(integerToReal(CAA_WEIGHT) div PERCENT);
+			finalGPA = finalGPA + student.activities[i].activityMark
+				* integerToReal(integerToReal(CAA_WEIGHT) / PERCENT);
 		else 
-			finalGPA = finalGPA + student.activities[i].activityMark * integerToReal(integerToReal(PR_WEIGHT) div PERCENT);
+			finalGPA = finalGPA + student.activities[i].activityMark
+				* integerToReal(integerToReal(PR_WEIGHT) / PERCENT);
 		end if
 	end for
 	return finalGPA;
@@ -74,8 +76,7 @@ end function
 
 {End auxiliary functions}
 
-algorithm UOCSubjectGrade
-	var
+algorithm UOCSubjectGrade var
 		students: vector [MAX_STUDENTS] of tStudent;
 		studentCount, studentId, i: integer;
 		

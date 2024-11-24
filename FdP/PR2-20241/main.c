@@ -10,9 +10,10 @@
 #include <stdbool.h>
 #include <string.h>
 
-/*Constants for file reading */
+/* Constants for file reading */
 #define MAX_FILE_NAME 100+1
 #define MAX_LINE 514
+
 /*****************************/
 
 #define MAX_NAME_LENGTH 20+1
@@ -39,9 +40,9 @@ typedef struct {
 }tActivity;
 
 typedef struct {
-    int studentId;							/* Student ID */               
-    char name[MAX_NAME_LENGTH];				/* Student Name */
-    tActivity activities [NUM_ACTIVITIES];	/* Student Activities */
+    int studentId;							/* Student ID			*/               
+    char name[MAX_NAME_LENGTH];				/* Student Name			*/
+    tActivity activities [NUM_ACTIVITIES];	/* Student Activities	*/
 } tStudent;
 
 /* Function prototype declarations for auxiliary functions */
@@ -50,8 +51,8 @@ void writeStudentData (tStudent student, float mark, tGrade grade);
 void writeStudentActivities (tStudent student);
 
 /* Function prototype declarations for exercises */
-float getFinalGPA(tStudent student); /* Exercise 1 */
-tGrade getFinalGrade(float finalGPA); /* Exercise 2 */
+float getFinalGPA(tStudent student);		/* Exercise 1 */
+tGrade getFinalGrade(float finalGPA);		/* Exercise 2 */
 
 /* main */
 int main(int argc, char **argv)
@@ -215,7 +216,9 @@ void writeStudentActivities (tStudent student) {
 }
 
 /* End auxiliary functions */
+
 /***************************/
+
 /* Exercise 1 */
 float getFinalGPA(tStudent student){
 	float finalGPA;
@@ -237,14 +240,18 @@ tGrade getFinalGrade(float finalGPA){
 	tGrade finalGrade;
 
 	finalGrade = A;
-	if (finalGPA < MIN_A)
+	if (finalGPA < MIN_A){
 		finalGrade = B;
-	if (finalGPA < MIN_B)
+	}
+	if (finalGPA < MIN_B){
 		finalGrade = C_PLUS;
-	if (finalGPA < MIN_C_PLUS)
+	}
+	if (finalGPA < MIN_C_PLUS){
 		finalGrade = C_MINUS;
-	if (finalGPA < MIN_C_MINUS)
+	}
+	if (finalGPA < MIN_C_MINUS){
 		finalGrade = D;
+	}
 
 	return finalGrade;
 }
