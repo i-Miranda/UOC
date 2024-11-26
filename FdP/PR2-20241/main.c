@@ -25,9 +25,9 @@
 #define MIN_B       7.0f		/*	Minimum mark for grade B 	*/
 #define MIN_A       9.0f		/*	Minimum mark for grade A 	*/
 
-#define CAA_WEIGHT 10			/*	Percent weight of each CAA in the final grade	*/
-#define PR_WEIGHT  20			/*	Percent weight of each PR in the final grade	*/
-#define PERCENT   100			/*	100%, used to with *_WEIGHT variables			*/
+#define CAA_WEIGHT	10			/*	Percent weight of each CAA in the final grade	*/
+#define PR_WEIGHT	20			/*	Percent weight of each PR in the final grade	*/
+#define PERCENT		100.0f		/*	100%, used to with *_WEIGHT variables			*/
 
 
 /* User defined types */
@@ -227,9 +227,11 @@ float getFinalGPA(tStudent student){
 	finalGPA = 0;
 	for(i = 0; i < NUM_ACTIVITIES; i++){
 		if (student.activities[i].activityType == CAA){
-			finalGPA += student.activities[i].activityMark * (float)CAA_WEIGHT/PERCENT;
+			finalGPA += student.activities[i].activityMark
+				* ((float)CAA_WEIGHT/PERCENT);
 		} else {
-			finalGPA += student.activities[i].activityMark * (float)PR_WEIGHT/PERCENT;
+			finalGPA += student.activities[i].activityMark
+				* ((float)PR_WEIGHT/PERCENT);
 		}
 	}
 	return finalGPA;
