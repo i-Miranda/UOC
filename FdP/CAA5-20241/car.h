@@ -1,3 +1,10 @@
+/*
+ * Author: Ivan Miranda Moral
+ * Date: 02-12-2024
+ * Description: This program reads user keyboard input, and returns the most
+ * efficient car according to the specs provided in the test.data file.
+ */
+
 /* System header files */
 #include <stdio.h>
 #include <string.h>
