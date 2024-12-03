@@ -13,7 +13,7 @@ void setCar(tCar *car){
 	scanf("%s", car->name);
 	printf("ENGINE (0-DIESEL, 1-GASOLINE, 2-ELECTRIC)?\n");
 	scanf("%u", &car->engine);
-	printf("CONSUMPTION PER 100KM?\n");
+	printf("CONSUMPTION PER 100 KM?\n");
 	scanf("%f", &car->consumption);
 }
 
@@ -45,11 +45,9 @@ void getWinnerCar(tCar *car1, tCar *car2, tCar *winner){
 /* Outputs the car with winning stats */
 void displayWinnerStats(tCar *car){
 	printf("OUTPUT\n");
-	printf("THE MOST EFFCIENT CAR IS:\n");
+	printf("THE MOST EFFICIENT CAR IS:\n");
 	printf("MODEL: %s\n", car->name);
 	printf("ENGINE (0-DIESEL, 1-GASOLINE, 2-ELECTRIC): %u\n", car->engine);
-	printf("CONSUMTION PER 100KM: %.2f\n", car->consumption);
-	if (car->engine != ELECTRIC){	
-		printf("ELECTRICAL EQUIVALENT CONSUMPTION: %.2f\n", car->electricConsumption);
-	}
+	printf("CONSUMTION PER 100 KM: %.2f\n", car->consumption);
+	printf("ELECTRICAL EQUIVALENT CONSUMPTION: %.2f\n", car->electricConsumption);
 }
