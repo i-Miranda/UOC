@@ -9,12 +9,10 @@
 
 /* Receives user input and saves it to tCar double pointer */
 void setCar(tCar *car){
-	/* Initializing car->engine to fix the scanf warning looking for int */
-	car->engine = DIESEL;
 	printf("MODEL?\n");
 	scanf("%s", car->name);
 	printf("ENGINE (0-DIESEL, 1-GASOLINE, 2-ELECTRIC)?\n");
-	scanf("%d", &car->engine);
+	scanf("%u", &car->engine);
 	printf("CONSUMPTION PER 100KM?\n");
 	scanf("%f", &car->consumption);
 }
@@ -49,7 +47,7 @@ void displayWinnerStats(tCar *car){
 	printf("OUTPUT\n");
 	printf("THE MOST EFFCIENT CAR IS:\n");
 	printf("MODEL: %s\n", car->name);
-	printf("ENGINE (0-DIESEL, 1-GASOLINE, 2-ELECTRIC): %d\n", car->engine);
+	printf("ENGINE (0-DIESEL, 1-GASOLINE, 2-ELECTRIC): %u\n", car->engine);
 	printf("CONSUMTION PER 100KM: %.2f\n", car->consumption);
 	if (car->engine != ELECTRIC){	
 		printf("ELECTRICAL EQUIVALENT CONSUMPTION: %.2f\n", car->electricConsumption);
