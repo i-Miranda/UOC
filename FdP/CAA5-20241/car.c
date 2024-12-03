@@ -24,8 +24,12 @@ void setElectricConsumption(tCar *car){
 }
 /* Compares the cars' KWH to get the winner */
 void getWinnerCar(tCar *car1, tCar *car2, tCar *winner){
+	/* If car1's electricConsumption is less than car2, car1 wins */
 	if (car1->electricConsumption < car2->electricConsumption){
 		*winner = *car1;
+	/* If car2's electricConsumption is less than car1, car2 wins */
+	/* ---------------------------OR----------------------------- */
+	/* ---------------If they tie, car2 still wins--------------- */
 	} else {
 		*winner = *car2;
 	}

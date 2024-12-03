@@ -6,9 +6,12 @@
 /* The max length of the car name string */
 /* (THE MAX_LEN IS 25 PLUS THE NULL TERMINATOR...) */
 #define MAX_LEN 25+1
+/* Used to calculate the electric equivalent KWH */
 #define DIESEL_KWH 10.0
+/* Used to calculate the electric equivalent KWH */
 #define GASOLINE_KWH 9.5
 
+/* The car's engine */
 typedef enum {DIESEL, GASOLINE, ELECTRIC} tEngine;
 
 /* The tCar struct*/
