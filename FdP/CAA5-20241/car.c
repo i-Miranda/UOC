@@ -9,6 +9,8 @@
 
 /* Receives user input and saves it to tCar double pointer */
 void setCar(tCar *car){
+	/* Initializing car->engine to fix the scanf warning looking for int */
+	car->engine = DIESEL;
 	printf("MODEL?\n");
 	scanf("%s", car->name);
 	printf("ENGINE (0-DIESEL, 1-GASOLINE, 2-ELECTRIC)?\n");
