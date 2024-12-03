@@ -6,8 +6,10 @@
 /* The max length of the car name string */
 /* (THE MAX_LEN IS 25 PLUS THE NULL TERMINATOR...) */
 #define MAX_LEN 25+1
+#define DIESEL_KWH 10.0
+#define GASOLINE_KWH 9.5
 
-typedef enum {GASOLINE, DIESEL, ELECTRIC} tEngine;
+typedef enum {DIESEL, GASOLINE, ELECTRIC} tEngine;
 
 /* The tCar struct*/
 typedef struct {
@@ -21,8 +23,8 @@ typedef struct {
 
 /* Receives user input and saves it to tCar double pointer */
 void setCar(tCar *car);
-/* The getKWH prototype */
-void getKWH(tCar *car);
+/* Sets the tCar's electricConsumption using its engine to determine the value */
+void setElectricConsumption(tCar *car);
 /* Compares the cars to get the winner */
 void getWinnerCar(tCar *car1, tCar *car2, tCar *winner);
 /* Outputs the car with winning stats */
