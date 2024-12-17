@@ -1,0 +1,3 @@
+/home/uoc/Documents/codelite/workspaces/PR3_E/PR3/include/grades.h
+/home/uoc/Documents/codelite/workspaces/PR3_E/PR3/src/grades.c
+/home/uoc/Documents/codelite/workspaces/PR3_E/PR3/src/main.c
