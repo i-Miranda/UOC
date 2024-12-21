@@ -9,23 +9,25 @@
 
 /* Exercise 1 */
 /* Function to load student data from file */
-void studentsLoadDataFromFile(const char* filename, tStudentsTable *studentsTable, bool *isRead)
-{
-	FILE *fin=0;
+void studentsLoadDataFromFile(const char *filename, tStudentsTable *studentsTable, bool *isRead)
+{ FILE *fin=0;
 	char line[MAX_LINE];
 	char buffer[MAX_LINE];
 	tStudent newStudent;
 	int i;
+	tActivityName actName;
 	
 	/* Open the input file */
 	if ((fin = fopen(filename,"r")) != NULL) {
-		/* Read all the students */
         /* Initializations */
-		/* ... */
-		while (!feof(fin) && /* ... */) {
+		studentsTable->nStudents = 0;
+		actName = CAA1;
+
+		/* Read all of the students */
+		while (!feof(fin) && studentsTable->nStudents < MAX_STUDENTS) {
 			/* Remove any content from the line */
 			line[0] = '\0';
-			
+
 			/* Read one line (maximum 511 chars) and store it in "line" variable */
 			fgets (line,MAX_LINE - 1, fin);
 			
@@ -40,14 +42,17 @@ void studentsLoadDataFromFile(const char* filename, tStudentsTable *studentsTabl
 				for (i = 0; i < NUM_ACTIVITIES; i++) {
                     /* Read mark and state of the activity */
                     sscanf(buffer, "%f %u %[^\n]s", &newStudent.activities[i].mark, &newStudent.activities[i].state, buffer);
+
                     /* Assign activity name */
-                    /* ... */
+					actName = CAA1;
+					newStudent.activities[i].name = actName + i;
 				}	
 				
 				/* Add student to students table*/
-				studentsTable[i] = newStudent;
+				studentsTable->students[studentsTable->nStudents] = newStudent;
                 /* Increment the counter. */
-				studentsTable.nStudents++;
+				studentsTable->nStudents++;
+
 			}
 		}
 		/* Close the file */
@@ -61,18 +66,35 @@ void studentsLoadDataFromFile(const char* filename, tStudentsTable *studentsTabl
 
 /* Exercise 2 */
 /* Action to calculate a student's CAA and PR marks */
-void	calculateStudentCaaAndPr(tStudent student){
+void	calculateStudentCaaAndPr(tStudent student, float *markCaa, float *markPr){
 	tActivityType actType;
 	int actWeight;
-}
-/* ... */
+	int	i;
 
+	/* Initialization before loop */
+	i = 0;
+	*markCaa = 0.0f;
+	*markPr = 0.0f;
+
+	while (i < NUM_ACTIVITIES){
+		getActivityTypeAndWeight(student.activities[i], &actType, &actWeight);	
+		if (student.activities[i].state == SUBMITTED){
+			if (actType == CAA){
+				*markCaa += student.activities[i].mark * (float)actWeight/100.0f;
+			} else {
+				*markPr += student.activities[i].mark * (float)actWeight/100.0f;
+			}
+		}
+		i++;
+	}
+}
 
 /* Exercise 3 */ 
 /* Action that returns the type of activity and its weight */
 void	getActivityTypeAndWeight(tActivity activity, tActivityType *actType, int *actWeight){
 	if (activity.name < PR1){
 		*actType = CAA;
+
 		if (activity.name == CAA1){
 			*actWeight = CAA1_WEIGHT;
 		} else if (activity.name == CAA2){
@@ -84,6 +106,7 @@ void	getActivityTypeAndWeight(tActivity activity, tActivityType *actType, int *a
 		}
 	} else {
 		*actType = PR;
+
 		if (activity.name == PR1){
 			*actWeight = PR1_WEIGHT;
 		} else if (activity.name == PR2){
@@ -94,38 +117,53 @@ void	getActivityTypeAndWeight(tActivity activity, tActivityType *actType, int *a
 	}
 }
 
-
-
 /* Exercise 4 */
 /* Action to calculate a student's CAA and PR marks */
-/* ... */
+void	getNActivitiesSubmitted(tStudent student, int *nCaa, int *nPr){
+	tActivityType actType;
+	int actWeight;
+	int i;
 
-
+	i = 0;
+	*nCaa = 0;
+	*nPr = 0;
+	while (i < NUM_ACTIVITIES){
+		getActivityTypeAndWeight(student.activities[i], &actType, &actWeight);	
+		if (student.activities[i].state == SUBMITTED){
+			if (actType == CAA){
+				(*nCaa)++;
+			} else {
+				(*nPr)++;
+			}
+		}
+		i++;
+	}
+}
 
 /* Exercise 5 */ 
 /* Action that writes a student's ID, name and grades in both numeric and letter format. */
 void writeStudentData (tStudent student, float markCaa, float markPr, int nCaa, int nPr) {
-	/* Data output */
-	printf("%d\n", student.studentId);
-	printf("%s\n", student.name);
-	printf("%.2f\n", student.activities[nCaa]);
-	printf("%.2f\n", student.activities[nPr]);
-	/* ... */
-}
+	bool allSubmitted;
 
+	allSubmitted = checkAllPRSubmitted(nPr);
+	/* Data output */
+	printf("%d ", student.studentId);
+	printf("%s ", student.name);
+	printf("%.2f ", markCaa);
+	printf("%.2f ", markPr);
+	printf("%d ", nCaa);
+	printf("%d ", nPr);
+	printf("%d\n", allSubmitted);
+}
 
 /* Exercise 6 */ 
 /* Function that test all PR activities are submitted */
-bool checkAllPRSubmitted(tStudent student){
-	bool allSubmitted = true;
-	int	i = 0;
+bool checkAllPRSubmitted(int nPr){
+	int	expectednPr = 3;
+	bool allSubmitted = false;
 
-	while (i < NUM_ACTIVITIES)
-	{
-		if (student.activities[i].state != SUBMITTED){
-			allSubmitted = false;
-		}
-		i++;
+	if (nPr == expectednPr){
+		allSubmitted = true;
 	}
 	return allSubmitted;
 }

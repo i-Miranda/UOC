@@ -1,0 +1,230 @@
+const
+	MAX_STUDENTS:		integer = 20;	{Max. number of students}
+	NUM_ACTIVITIES:		integer = 7;	{Max. number of activities of the subject}
+	NUM_CAA_ACTIVITIES:	integer = 4;	{Number of CAA activities}
+	NUM_PR_ACTIVITIES:	integer = 3;	{Number of PR activities}
+
+	MIN_C_MINUS:		real = 3.0;		{Minimum mark for grade C-}
+	MIN_C_PLUS:			real = 5.0;		{Minimum mark for grade C+}
+	MIN_B:				real = 7.0;		{Minimum mark for grade B}
+	MIN_A:				real = 9.0;		{Minimum mark for grade A}
+
+	CAA1_WEIGHT:		integer = 10;	{Percent weight of CAA1 in EC grade}
+	CAA2_WEIGHT:		integer = 20;	{Percent weight of CAA2 in EC grade}
+	CAA3_WEIGHT:		integer = 30;	{Percent weight of CAA3 in EC grade}
+	CAA4_WEIGHT:		integer = 40;	{Percent weight of CAA4 in EC grade}
+	PR1_WEIGHT:			integer = 20;	{Percent weight of PR1 in PR grade}
+	PR2_WEIGHT:			integer = 30;	{Percent weight of PR2 in PR grade}
+	PR3_WEIGHT:			integer = 50;	{Percent weight of PR3 in PR grade}
+
+	PERCENT:			real = 100.0;	{100% real value used to calculate weight}
+end const
+
+type 
+	{User defined types}
+	tGrade = {A, B, C_PLUS, C_MINUS, D}
+	tActivityType = {CAA, PR}
+	tActivityName = {CAA1, CAA2, CAA3, CAA4, PR1, PR2, PR3}
+	tActivityState = {SUBMITTED, NOT_SUBMITTED, EXCLUDED}
+
+	tActivity = record
+		name:		tActivityName;							{Activity Name}
+		state:		tActivityState;							{Activity State}
+		mark:		real;									{Activity Mark}
+	end record
+
+	tStudent = record
+		studentId:	integer;								{Student ID}
+		name:		string;									{Student Name}
+		activities:	vector[NUM_ACTIVITIES] of tActivity;	{Student Activities}
+	end record
+
+	tStudentsTable = record
+		students:	vector[MAX_STUDENTS] of tStudent;		{Students info and grades}
+		nStudents:	integer;								{Number of students}
+	end record
+
+end type
+
+{Exercise 1}
+{Function to load student data from file}
+action studentsLoadDataFromFile(in filename: string, out studentsTable: tStudentsTable, out isRead: boolean)
+	var
+		fileToRead:	file;
+		newStudent:	tStudent;
+		i:			integer;
+
+		actName:	tActivityName;
+	end var
+	fileToRead := openFile(filename);
+	if fileToRead ≠ NULL then
+		{Initializations}
+		studentsTable.nStudents := 0;
+		actName := CAA1;
+
+		{Read all of the students}
+		while not isEndOfFile(fileToRead) and studentsTable.nStudents < MAX_STUDENTS do
+			newStudent.studentId := readIntegerFromFile(fileToRead);
+			newStudent.name := readStringFromFile(fileToRead);
+			for i := 1 to NUM_ACTIVITIES do
+				{Read mark and activity state}
+				newStudent.activities[i].mark := readRealFromFile(fileToRead);
+				newStudent.activities[i].state := readEnumFromFile(fileToRead);
+				{Assign activity name}
+				actName := CAA1;
+				newStudent.activities[i].name := actName + i;
+			end for
+			{Add newStudent to studentsTable }
+			studentsTable.students[studentsTable.nStudents] := newStudent;
+			{Increment the counter.}
+			studentsTable.nStudents := studentsTable.nStudents + 1;
+		end while
+		{Close the file}
+		closeFile(fileToRead);
+		isRead := true;
+	else 
+		isRead := false;
+	end if
+end action
+
+{Exercise 2}
+{Action to calculate a student's CAA and PR marks}
+action	calculateStudentCaaAndPr(in student: tStudent, out markCaa: real, out markPr: real)
+	actType:	tActivityType;
+	actWeight:	integer;
+	i:			integer;
+
+	{Initialization before loop}
+	i := 0;
+	markCaa := 0.0;
+	markPr := 0.0;
+
+	while i < NUM_ACTIVITIES do
+		getActivityTypeAndWeight(student.activities[i], &actType, &actWeight);	
+		if student.activities[i].state = SUBMITTED then
+			if actType = CAA then
+				markCaa := markCaa + student.activities[i].mark * IntegerToReal(actWeight)/PERCENT;
+			else
+				markPr :=  markPr + student.activities[i].mark * IntegerToReal(actWeight)/PERCENT;
+			end if
+		end if
+	end while
+end action
+
+{Exercise 3}
+{Action that returns the type of activity and its weight} 
+action	getActivityTypeAndWeight(in activity: tActivity, out actType: tActivityType, out actWeight: integer){
+	if activity.name < PR1 then
+		actType := CAA;
+
+		if activity.name = CAA1 then
+			actWeight := CAA1_WEIGHT;
+		else if activity.name == CAA2 then
+			actWeight := CAA2_WEIGHT;
+		else if activity.name = CAA3 then
+			actWeight := CAA3_WEIGHT;
+		else if activity.name = CAA4 then
+			actWeight := CAA4_WEIGHT;
+		end if
+	else
+		actType := PR;
+
+		if activity.name = PR1 then
+			actWeight := PR1_WEIGHT;
+		else if activity.name = PR2 then
+			actWeight := PR2_WEIGHT;
+		else if activity.name = PR3 then
+			actWeight := PR3_WEIGHT;
+		end if
+	end if
+end action
+
+{Exercise 4}
+{Action to calculate a student's CAA and PR marks}
+action	getNActivitiesSubmitted(in student: tStudent, out nCaa: integer, out nPr: integer)
+	actType: tActivityType;
+	actWeight: integer;
+	i: integer;
+
+	i := 0;
+	nCaa := 0;
+	nPr := 0;
+	while i < NUM_ACTIVITIES do
+		getActivityTypeAndWeight(student.activities[i], &actType, &actWeight);	
+		if student.activities[i].state = SUBMITTED then
+			if actType = CAA then
+				nCaa := nCaa + 1;
+			else
+				nPr := nPr + 1;
+			end if
+		end if
+	end while
+end action
+
+{Exercise 5}
+{Action that writes a student's ID, name and grades in both numeric and letter format.} 
+action writeStudentData(in student: tStudent, in markCaa: real, in markPr: real, in nCaa: integer, in nPr: integer)
+	allSubmitted: boolean;
+
+	allSubmitted = checkAllPRSubmitted(nPr);
+	{Data output}
+	writeInteger(student.studentId);
+	writeString(student.name);
+	writeReal(markCaa);
+	writeReal(markPr);
+	writeInteger(nCaa);
+	writeInteger(nPr);
+	writeBoolean(allSubmitted);
+end action
+
+{Exercise 6}
+{Function that test all PR activities are submitted} 
+function checkAllPRSubmitted(nPr: integer)
+	expectednPr: integer = 3;
+	allSubmitted: boolean = false;
+
+	if nPr = expectednPr then
+		allSubmitted := true;
+	end if
+	return allSubmitted;
+end function
+
+algorithm UOCSubjectGrade
+	var
+		studentsTable:	tStudentsTable;
+		i:				integer;
+		filename:		string;
+		isRead:			boolean;
+
+		{Variables stored for actions}
+		markCaa:		real;
+		markPr:			real;
+		nCaa:			integer;
+		nPr:			integer;
+	end var
+
+	{Load data from file}
+	writeString("LOAD DATA FROM FILE. ENTER FILE NAME >>");
+	filename := readString();
+
+	{Exercise 1}
+	studentsLoadDataFromFile(filename, studentsTable, isRead);
+
+	{Data successfully loaded}
+	if isRead then
+		writeString(“RESULTS:”);
+		writeString(“ID NAME PEC_MARK PR_MARK N_PEC N_PR ALL_PR?(1=YES)”);
+
+		{Only iterate the amount of nStudents in the studentsTable}
+		for i := 1 to studentsTable.nStudents do
+			{Exercise 2}
+			calculateStudentCaaAndPr(studentsTable.students[i], markCaa, markPr);
+			{Exercise 4}
+			getNActivitiesSubmitted(studentsTable.students[i], nCaa, nPr);
+			{Exercise 5}
+			writeStudentData(studentsTable.students[i], markCaa, markPr, nCaa, nPr);
+		end for
+	else
+		writeString("NO STUDENTS RECOVERED");
+	end if
+end algorithm

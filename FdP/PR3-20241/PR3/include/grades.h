@@ -30,6 +30,7 @@
 #define PR2_WEIGHT  30 /* Percent weight of PR2 in PR grade */
 #define PR3_WEIGHT  50 /* Percent weight of PR3 in PR grade */
 
+#define PERCENT	100.0f /* 100% float value used to calculate weight */
 /* User defined types */
 typedef enum {A = 1, B, C_PLUS, C_MINUS, D} tGrade;
 typedef enum {CAA = 1, PR} tActivityType;
@@ -55,6 +56,10 @@ typedef struct {
 
 
 /* Functions prototypes declaration */
-void studentsLoadDataFromFile(const char* filename, tStudentsTable *studentsTable, bool *isRead);
-void writeStudentData (tStudent student, float markCaa, float markPr, int nCaa, int nPr);
+void	studentsLoadDataFromFile(const char* filename, tStudentsTable *studentsTable, bool *isRead);
+void	calculateStudentCaaAndPr(tStudent student, float *markCaa, float *markPr);
+void	getActivityTypeAndWeight(tActivity activity, tActivityType *actType, int *actWeight);
+void	getNActivitiesSubmitted(tStudent student, int *nCaa, int *nPr);
+void	writeStudentData (tStudent student, float markCaa, float markPr, int nCaa, int nPr);
+bool	checkAllPRSubmitted(int nPr);
 /* ... */

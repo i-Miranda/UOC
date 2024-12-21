@@ -11,40 +11,45 @@
 /*Constant for file reading */
 #define MAX_FILE_NAME 100+1
 
-
 /* main */
 int main(int argc, char **argv)
 {
-	tStudentsTable studentsTable;
-	int i;
-	char filename[MAX_FILE_NAME];
-	bool isRead = false;
+	tStudentsTable	studentsTable;
+	int				i;
+	char			filename[MAX_FILE_NAME];
+	bool			isRead = false;
+
+	/* Variables stored for actions */
+	float			markCaa;
+	float			markPr;
+	int				nCaa;
+	int				nPr;
 	
-	/* load data from file*/ 
+	/* load data from file*/
     printf("LOAD DATA FROM FILE. ENTER FILE NAME >>\n");
     scanf("%s", filename);
 
-    /* Exercise 1 */	
-    /* ... */	
-	
-	if (isRead) { /* Data successfully loaded */
+    /* Exercise 1 */
+	studentsLoadDataFromFile(filename, &studentsTable, &isRead);
 
-           printf ("\nRESULTS:\n");
-           printf("ID NAME PEC_MARK PR_MARK N_PEC N_PR ALL_PR?(1=YES)\n");
-           
-           for(i = 0; /* ... */; i++) {
-               /* Exercise 2 */          
-               /* ... */
-               /* Exercise 4 */
-               /* ... */
-               /* Exercise 5 */
-               /* ... */
-           }
-		
-	}
-	else {
+	/* Data successfully loaded */
+	if (isRead) { 
+		printf ("\nRESULTS:\n");
+		printf("ID NAME PEC_MARK PR_MARK N_PEC N_PR ALL_PR?(1=YES)\n");
+
+		/* Only iterate the amount of nStudents in the studentsTable */
+		for(i = 0; i < studentsTable.nStudents; i++) {
+			/* Exercise 2 */
+			calculateStudentCaaAndPr(studentsTable.students[i], &markCaa, &markPr);
+			/* Exercise 4 */
+			getNActivitiesSubmitted(studentsTable.students[i], &nCaa, &nPr);
+			/* Exercise 5 */
+			writeStudentData(studentsTable.students[i], markCaa, markPr, nCaa, nPr);
+		}
+
+	} else {
 		/* No data recovered */
-		printf("NO STUDENTS RECOVERED\n");	
+		printf("NO STUDENTS RECOVERED\n");
 	}
 		
 	return 0;
