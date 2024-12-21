@@ -45,21 +45,34 @@ void studentsLoadDataFromFile(const char *filename, tStudentsTable *studentsTabl
                     /* Assign activity name */
 					if (i == 0){
 						actName = CAA1;
-					} else if (i == 1){
-						actName = CAA2;
-					} else if (i == 2){
-						actName = CAA3;
-					} else if (i == 3){
-						actName = CAA4;
-					} else if (i == 4){
-						actName = PR1;
-					} else if (i == 5){
-						actName = PR2;
-					} else if (i == 6){
-						actName = PR3;
-					}	
+					} else {
+						if (i == 1){
+							actName = CAA2;
+						} else {
+							if (i == 2){
+								actName = CAA3;
+							} else {
+								if (i == 3){
+									actName = CAA4;
+								} else {
+									if (i == 4){
+										actName = PR1;
+									} else {
+										if (i == 5){
+											actName = PR2;
+										} else {
+											if (i == 6){
+											actName = PR3;
+											}	
+										}
+									}
+								}
+							}
+						}
+					}
 					newStudent.activities[i].name = actName;
 				}	
+
 				/* Add student to students table*/
 				studentsTable->students[studentsTable->nStudents] = newStudent;
                 /* Increment the counter. */
@@ -70,8 +83,7 @@ void studentsLoadDataFromFile(const char *filename, tStudentsTable *studentsTabl
 		/* Close the file */
 		fclose(fin);
 		*isRead = true;
-	}
-	else {
+	} else {
 		*isRead = false;
 	}
 }

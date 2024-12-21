@@ -60,7 +60,6 @@ action studentsLoadDataFromFile(in filename: string, out studentsTable: tStudent
 	if fileToRead ≠ NULL then
 		{Initializations}
 		studentsTable.nStudents := 0;
-		actName := CAA1;
 
 		{Read all of the students}
 		while not isEndOfFile(fileToRead) and studentsTable.nStudents < MAX_STUDENTS do
@@ -70,10 +69,38 @@ action studentsLoadDataFromFile(in filename: string, out studentsTable: tStudent
 				{Read mark and activity state}
 				newStudent.activities[i].mark := readRealFromFile(fileToRead);
 				newStudent.activities[i].state := readEnumFromFile(fileToRead);
+
 				{Assign activity name}
-				actName := CAA1;
-				newStudent.activities[i].name := actName + i;
+				if i = 0 then
+					actName := CAA1;
+				else 
+					if i = 1 then
+						actName := CAA2;
+					else 
+						if i = 2 then
+							actName := CAA3;
+						else 
+							if i = 3 then
+								actName := CAA4;
+							else
+								if i == 4 then
+									actName := PR1;
+								else 
+									if i = 5 then
+										actName := PR2;
+									else 
+										if i = 6 then
+											actName := PR3;
+										end if	
+									end if	
+								end if	
+							end if	
+						end if	
+					end if	
+				end if	
+				newStudent.activities[i].name := actName;
 			end for
+
 			{Add newStudent to studentsTable }
 			studentsTable.students[studentsTable.nStudents] := newStudent;
 			{Increment the counter.}
