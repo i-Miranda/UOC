@@ -21,7 +21,6 @@ void studentsLoadDataFromFile(const char *filename, tStudentsTable *studentsTabl
 	if ((fin = fopen(filename,"r")) != NULL) {
         /* Initializations */
 		studentsTable->nStudents = 0;
-		actName = CAA1;
 
 		/* Read all of the students */
 		while (!feof(fin) && studentsTable->nStudents < MAX_STUDENTS) {
@@ -44,10 +43,23 @@ void studentsLoadDataFromFile(const char *filename, tStudentsTable *studentsTabl
                     sscanf(buffer, "%f %u %[^\n]s", &newStudent.activities[i].mark, &newStudent.activities[i].state, buffer);
 
                     /* Assign activity name */
-					actName = CAA1;
-					newStudent.activities[i].name = actName + i;
+					if (i == 0){
+						actName = CAA1;
+					} else if (i == 1){
+						actName = CAA2;
+					} else if (i == 2){
+						actName = CAA3;
+					} else if (i == 3){
+						actName = CAA4;
+					} else if (i == 4){
+						actName = PR1;
+					} else if (i == 5){
+						actName = PR2;
+					} else if (i == 6){
+						actName = PR3;
+					}	
+					newStudent.activities[i].name = actName;
 				}	
-				
 				/* Add student to students table*/
 				studentsTable->students[studentsTable->nStudents] = newStudent;
                 /* Increment the counter. */
