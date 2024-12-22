@@ -2,7 +2,7 @@
 * File: grades.h
 * Author: Ivan Miranda Moral
 * Course: 20241
-* Description: PR2
+* Description: PR3
 */
 
 #include	<stdio.h>

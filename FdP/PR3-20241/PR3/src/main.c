@@ -2,7 +2,7 @@
 * File: main.c
 * Author: Ivan Miranda Moral
 * Course: 20241
-* Description: PR2
+* Description: PR3
 */
 
 /* System header files */
