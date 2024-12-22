@@ -20,10 +20,8 @@ int main(int argc, char **argv)
 	bool			isRead = false;
 
 	/* Variables stored for actions */
-	float			markCaa;
-	float			markPr;
-	int				nCaa;
-	int				nPr;
+	float			markCaa, markPr;
+	int				nCaa, nPr;
 	
 	/* load data from file*/
     printf("LOAD DATA FROM FILE. ENTER FILE NAME >>\n");
@@ -46,7 +44,6 @@ int main(int argc, char **argv)
 			/* Exercise 5 */
 			writeStudentData(studentsTable.students[i], markCaa, markPr, nCaa, nPr);
 		}
-
 	} else {
 		/* No data recovered */
 		printf("NO STUDENTS RECOVERED\n");

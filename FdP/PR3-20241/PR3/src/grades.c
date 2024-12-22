@@ -92,8 +92,7 @@ void studentsLoadDataFromFile(const char *filename, tStudentsTable *studentsTabl
 /* Action to calculate a student's CAA and PR marks */
 void	calculateStudentCaaAndPr(tStudent student, float *markCaa, float *markPr){
 	tActivityType actType;
-	int actWeight;
-	int	i;
+	int actWeight, i;
 
 	/* Initialization before loop */
 	i = 0;
@@ -121,22 +120,32 @@ void	getActivityTypeAndWeight(tActivity activity, tActivityType *actType, int *a
 
 		if (activity.name == CAA1){
 			*actWeight = CAA1_WEIGHT;
-		} else if (activity.name == CAA2){
-			*actWeight = CAA2_WEIGHT;
-		} else if (activity.name == CAA3){
-			*actWeight = CAA3_WEIGHT;
-		} else if (activity.name == CAA4){
-			*actWeight = CAA4_WEIGHT;
+		} else {
+			if (activity.name == CAA2){
+				*actWeight = CAA2_WEIGHT;
+			} else {
+				if (activity.name == CAA3){
+					*actWeight = CAA3_WEIGHT;
+				} else {
+					if (activity.name == CAA4){
+						*actWeight = CAA4_WEIGHT;
+					}
+				}
+			}
 		}
 	} else {
 		*actType = PR;
 
 		if (activity.name == PR1){
 			*actWeight = PR1_WEIGHT;
-		} else if (activity.name == PR2){
-			*actWeight = PR2_WEIGHT;
-		} else if (activity.name == PR3){
-			*actWeight = PR3_WEIGHT;
+		} else {
+			if (activity.name == PR2){
+				*actWeight = PR2_WEIGHT;
+			} else {
+				if (activity.name == PR3){
+					*actWeight = PR3_WEIGHT;
+				}
+			}
 		}
 	}
 }
@@ -145,8 +154,7 @@ void	getActivityTypeAndWeight(tActivity activity, tActivityType *actType, int *a
 /* Action to calculate a student's CAA and PR marks */
 void	getNActivitiesSubmitted(tStudent student, int *nCaa, int *nPr){
 	tActivityType actType;
-	int actWeight;
-	int i;
+	int actWeight, i;
 
 	i = 0;
 	*nCaa = 0;
