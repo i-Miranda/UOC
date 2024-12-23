@@ -1,3 +1,9 @@
+/*
+* File: main.c
+* Author: Ivan Miranda Moral
+* Course: 20241
+* Description: PR4
+*/
 
 #include <stdio.h>
 #include <stdbool.h>

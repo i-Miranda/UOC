@@ -1,6 +1,6 @@
 /*
 * File: main.c
-* Author: UOC
+* Author: Ivan Miranda Moral
 * Course: 20241
 * Description: PR4
 */

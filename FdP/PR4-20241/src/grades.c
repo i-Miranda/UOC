@@ -1,3 +1,10 @@
+/*
+* File: main.c
+* Author: Ivan Miranda Moral
+* Course: 20241
+* Description: PR4
+*/
+
 #include "grades.h"
 
 /* Function to load student data from file */
@@ -162,6 +169,7 @@ void	writeStudentsTableToFile(tStudentsTable *studentsTable, const char *filenam
 	int	i;
 	FILE* fileToWrite;
 
+	i = 0;
 	fileToWrite = fopen(filename, "w");
 	while(i < studentsTable->nStudents){
 		fprintf(fileToWrite, "%d ", studentsTable->students[i].studentId);
