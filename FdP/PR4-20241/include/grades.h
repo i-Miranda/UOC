@@ -69,8 +69,8 @@ typedef struct {
     int nStudents;							/* Number of students */ 
 } tStudentsTable;
 
-
 /* Functions prototypes declaration */
+
 /* Functions included in assignment */
 void	studentsLoadDataFromFile(const char* filename, tStudentsTable *studentsTable, bool *isRead);
 void	activityTypeWeight(tActivityName activity, tActivityType *activityType, int *activityWeight);

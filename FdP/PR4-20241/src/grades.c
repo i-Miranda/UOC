@@ -37,7 +37,9 @@ void studentsLoadDataFromFile(const char* filename, tStudentsTable *studentsTabl
 	
 				/* Read the grades and add them to the table */
 				for (i = 0; i < NUM_ACTIVITIES; i++) {
+					/* Read mark and activity state */
                     sscanf(buffer, "%f %u %[^\n]s", &newStudent.activities[i].mark, &newStudent.activities[i].state, buffer);
+					/* Assign activity name */
                     if (i == 0) {
                         newStudent.activities[i].name = CAA1;
                     } else {
@@ -64,7 +66,6 @@ void studentsLoadDataFromFile(const char* filename, tStudentsTable *studentsTabl
                         }
                     }
 				}	
-				
 				/* Add student to students vector*/
 				studentsTable->students[studentsTable->nStudents] = newStudent;
                 /* Increment the counter. */
@@ -151,13 +152,11 @@ void	calculateStudentCaaAndPr(tStudent *student){
 void	calculateFinalMarkAndAbsent(tStudent *student){
 	/* This algorithm checks various conditions to get the final mark */
 
-	/* If the weighted average of the CAA activities is below a 4, the student
-	 * fails */
+	/* If the weighted average of the CAA activities is below a 4, the student fails */
 	if (student->caaMark < MIN_C){
 		student->finalMark = student->caaMark;
 	} else {
-		/* If the weighted average of the PR activities is below a 5, the student
-		* fails */
+		/* If the weighted average of the PR activities is below a 5, the student fails */
 		if (student->prMark < MIN_C_PLUS){
 			student->finalMark = student->prMark;
 		} else {
@@ -213,20 +212,20 @@ void	sortStudentsTable(tStudentsTable *studentsTable){
 	tStudent tempStudent;
 	
 	/* A simple bubble sort algorithm */
+
 	/* We initialize i to nStudents - 1 to avoid the segmentation fault when
 	 * checking the next student in the array. */
 	i = studentsTable->nStudents - 1;
-	/* This first while defines how many students we should check in the inner
-	 * loop */
+	/* This first while defines how many students we should check in the inner loop */
 	while (i > 0){
 		j = 0;
 		/* Every time we iterate through the students, since the last place will
 		 * have the correct student, we don't need to check it again. i-- after
 		 * every completed sort allows us to sort faster. */
 		while (j < i){
-			if ((studentsTable->students[j].finalMark < studentsTable->students[j+1].finalMark) 
-				|| ((studentsTable->students[j].finalMark == studentsTable->students[j+1].finalMark)
-					&& (studentsTable->students[j].studentId > studentsTable->students[j+1].studentId))){
+			if ((studentsTable->students[j].finalMark < studentsTable->students[j+1].finalMark) || 
+				((studentsTable->students[j].finalMark == studentsTable->students[j+1].finalMark) && 
+					(studentsTable->students[j].studentId > studentsTable->students[j+1].studentId))){
 				tempStudent = studentsTable->students[j];	
 				studentsTable->students[j] = studentsTable->students[j+1];
 				studentsTable->students[j+1] = tempStudent;

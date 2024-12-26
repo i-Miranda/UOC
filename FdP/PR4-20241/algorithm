@@ -1,0 +1,353 @@
+const
+	MAX_STUDENTS: integer = 20; {Max. number of students}
+	NUM_ACTIVITIES: integer = 7; {Max. number of activities of the subject}
+	NUM_CAA_ACTIVITIES: integer = 4; {Number of CAA activities}
+	NUM_PR_ACTIVITIES: integer = 3; {Number of PR activities}
+	MIN_C_MINUS: real = 3.0; {Minimum mark for grade C-}
+	MIN_C_PLUS: real = 5.0; {Minimum mark for grade C+}
+	MIN_B: real = 7.0; {Minimum mark for grade B}
+	MIN_A: real = 9.0; {Minimum mark for grade A}
+	CAA1_WEIGHT: integer = 10; {Percent weight of CAA1 in CAA grade}
+	CAA2_WEIGHT: integer = 20; {Percent weight of CAA2 in CAA grade}
+	CAA3_WEIGHT: integer = 30; {Percent weight of CAA3 in CAA grade}
+	CAA4_WEIGHT: integer = 40; {Percent weight of CAA4 in CAA grade}
+	PR1_WEIGHT: integer = 20; {Percent weight of PR1 in PR grade}
+	PR2_WEIGHT: integer = 30; {Percent weight of PR2 in PR grade}
+	PR3_WEIGHT: integer = 50; {Percent weight of PR3 in PR grade}
+
+	/* Constants defined for PR4 */
+	PERCENT 100.0f				{Real value used to calculate weight}
+	MIN_C 4.0f					{Minimum mark for grade C}
+	MIN_NUM_CAA_ACTIVITIES 3	{Minimum number of CAA activities to avoid absent}
+	MIN_NUM_PR_ACTIVITIES  2	{Minimum number of PR activities to avoid absent}
+	FINAL_CAA_WEIGHT 30			{Percent weight for CAA in finalMark}
+	FINAL_PR_WEIGHT 70			{Percent weight for PR in finalMark}
+end const
+
+{User defined types}
+type
+	tGrade = {A, B, C_PLUS, C_MINUS, D}
+	tActivityType = {CAA, PR}
+	tActivityName = {CAA1, CAA2, CAA3, CAA4, PR1, PR2, PR3}
+	tActivityState = {SUBMITTED, NOT_SUBMITTED, EXCLUDED}
+
+	tActivity = record
+		name: tActivityName; 								{Activity Name}
+		state: tActivityState;								{Activity State}
+		mark: real;											{Activity Mark}
+	end record
+
+	tStudent = record
+		studentId: integer;									{Student ID}
+		name: string;										{Student Name}
+		activities: vector[NUM_ACTIVITIES] of tActivity; 	{Student Activities}
+		{Exercise 1}
+		caaMark, prMark, finalMark: real;
+		nCaa, nPrMark: integer;
+		absent: boolean;
+	end record
+
+	tStudentsTable = record
+		students: vector [MAX_STUDENTS] of tStudent;		{Students info and grades}
+		nStudents: integer;									{Number of students}
+	end record
+end type
+
+action studentsLoadDataFromFile(in filename: string, out studentsTable: tStudentsTable, out isRead: boolean)
+	var
+		fileToRead : file;
+		newStudent: tStudent;
+		i: integer;
+	end var
+
+	{Open the input file}
+	fileToRead := openFile(filename);
+	if fileToRead ≠ NULL then
+		{Read all the students}
+		studentsTable.nStudents := 0;
+		while not isEndOfFile(fileToRead) and studentsTable.nStudents < MAX_STUDENTS do
+			{Obtain the data from file line}
+			newStudent.studentId := readIntegerFromFile(fileToRead);
+			newStudent.name := readStringFromFile(fileToRead);
+			{Read the grades and add them to the table}
+			for i := 1 to NUM_ACTIVITIES do
+				{Read mark and activity state}
+				newStudent.activities[i].mark := readRealFromFile(fileToRead);
+				newStudent.activities[i].state := readEnumFromFile(fileToRead);
+				{Assign activity name}
+				if i = 1 then
+					newStudent.activities[i].name := CAA1;
+				else
+					if i = 2 then
+						newStudent.activities[i].name := CAA2;
+					else
+						if i = 3 then
+							newStudent.activities[i].name := CAA3;
+						else
+							if i = 4 then
+								newStudent.activities[i].name := CAA4;
+							else
+								if i = 5 then
+									newStudent.activities[i].name := PR1;
+								else
+									if i = 6 then
+										newStudent.activities[i].name := PR2;
+									else
+										newStudent.activities[i].name := PR3;
+									end if
+								end if
+							end if
+						end if
+					end if
+				end if
+			end for
+			{Add newStudent to studentsTable }
+			studentsTable.students[studentsTable.nStudents] := newStudent;
+            {Increment the counter.}
+			studentsTable.nStudents := studentsTable.nStudents + 1;
+		end while
+		{Close the file */
+		closeFile(fileToRead);
+		isRead := true;
+	else 
+		isRead := false;
+	end if
+end action
+
+{Action that returns the type of activity and its weight}
+action activityTypeWeight(in activity: tActivityName, out activityType: tActivityType, out activityWeight: real)
+	activityType := CAA;
+	if activity = CAA1 then
+		activityWeight := CAA1_WEIGHT;
+	else
+		if activity = CAA2 then
+			activityWeight := CAA2_WEIGHT;
+		else
+			if activity = CAA3 then
+				activityWeight := CAA3_WEIGHT;
+			else
+				if activity = CAA4 then
+					activityWeight := CAA4_WEIGHT;
+				else
+					activityType := PR;
+					if activity = PR1 then
+						activityWeight := PR1_WEIGHT;
+					else
+						if activity = PR2 then
+							activityWeight := PR2_WEIGHT;
+						else
+							activityWeight := PR3_WEIGHT;
+						end if
+					end if
+				end if
+			end if
+		end if
+	end if
+end action
+
+{Function that test all PR activies are submitted}
+function allSubmittedPr(nSubmitedPr: integer): boolean
+	return nSubmittedPr = NUM_PR_ACTIVITIES;
+end function
+
+{Exercise 2}
+{Action to calculate a student's CAA and PR marks and number of activities}
+action	calculateStudentCaaAndPr(out student: tStudent)
+	actType := tActivityType; 
+	actWeight, i := integer;
+
+	{Initialization before loop}
+	i := 1;
+	student.caaMark := 0.0f;
+	student.prMark := 0.0f;
+	student.nCaa := 0;
+	student.nPr := 0;
+
+	{While iterating amongst the activities, if they were SUBMITTED, we get}
+	{the type and the weight to figure out its value in the weighted caa and}
+	{pr averages}
+	while i < NUM_ACTIVITIES do
+		activityTypeWeight(student.activities[i].name, actType, actWeight);
+		if student->activities[i].state = SUBMITTED then
+			if actType = CAA then
+				student.nCaa := student.nCaa + 1;	
+				student.caaMark := student.caaMark + student.activities[i].mark * integerToReal(actWeight)/PERCENT;
+			else
+				student.nPr := student.nPr + 1;
+				student.prMark := student.prMark + student.activities[i].mark * integerToReal(actWeight)/PERCENT;
+			end if
+		end if
+	end while
+end action
+
+{Exercise 3}
+{Action that calculates student's final mark and NP registry} 
+action	calculateFinalMarkAndAbsent(out student: tStudent)
+	{This algorithm checks various conditions to get the final mark}
+
+	{If the weighted average of the CAA activities is below a 4, the student fails}
+	if student.caaMark < MIN_C then
+		student.finalMark := student.caaMark;
+	else
+		{If the weighted average of the PR activities is below a 5, the student fails}
+		if student.prMark < MIN_C_PLUS then
+			student.finalMark := student.prMark;
+		else
+			student.finalMark := student.caaMark 
+				* integerToReal(FINAL_CAA_WEIGHT)/PERCENT; 
+			student.finalMark := student.finalMark + student->prMark 
+				* integerToReal(FINAL_PR_WEIGHT)/PERCENT; 
+		end if
+	end if
+	{Even if the finalMark is a passing grade, if any PR activity was not turned in, the student fails}
+	if student.finalMark >= MIN_C_PLUS and student->nPr < NUM_PR_ACTIVITIES then
+		student.finalMark := MIN_C;	
+	end if
+	{Finally, if the amount of activities turned in is below the minimum, the student will be marked as absent}
+	if student.nCaa < MIN_NUM_CAA_ACTIVITIES and student.nPr < MIN_NUM_PR_ACTIVITIES then
+		student.absent = true;
+	end if
+end action
+
+{Exercise 4}
+/* Action that writes a student's ID, grade and NP in a file */
+action	writeStudentsTableToFile(tStudentsTable *studentsTable, const char *filename){
+	{I included the filename parameter to make the function more universal. I}
+	{didn't want to hard code "grades.txt" in the function so if it was to be}
+	{used in some other exercise, I could define the filename with a string}
+	{literal.}
+	var
+		i: integer;
+		fileToWrite: file = 0;
+	end var
+
+	i := 1;
+	filename := openFile(fileToWrite);
+	while i < studentsTable->nStudents then
+		studentsTable.students[i].studentId := writeIntegerToFile(fileToWrite);
+		studentsTable.students[i].name := writeStringToFile(fileToWrite);
+		studentsTable.students[i].caaMark := writeRealToFile(fileToWrite);
+		studentsTable.students[i].prMark :=writeRealToFile(fileToWrite);
+		studentsTable.students[i].nCaa := writeIntegerToFile(fileToWrite);
+		studentsTable.students[i].nPr := writeIntegerToFile(fileToWrite);
+		studentsTable.students[i].finalMark := writeRealToFile(fileToWrite);
+		studentsTable.students[i].absent := writeBooleanToFile(fileToWrite);
+	end while
+	closeFile(fileToWrite);
+end action
+
+{Exercise 5}
+{Action that order a student's table by mark and student id}
+action	sortStudentsTable(in studentsTable: tStudentsTable) then
+	var
+		i, j: integer;
+		tempStudent: tStudent;
+	end var
+	
+	{A simple bubble sort algorithm}
+
+	{We initialize i to nStudents - 1 to avoid the segmentation fault when}
+	{checking the next student in the array.}
+	i := studentsTable.nStudents - 1;
+	{This first while defines how many students we should check in the inner loop.}
+	while i > 0 do
+		j := 0;
+		{Every time we iterate through the students, since the last place will}
+		{have the correct student, we don't need to check it again. i-- after}
+		{every completed sort allows us to sort faster.}
+		while j < i do
+			if studentsTable.students[j].finalMark < studentsTable.students[j+1].finalMark or
+				(studentsTable.students[j].finalMark = studentsTable.students[j+1].finalMark and
+					studentsTable.students[j].studentId > studentsTable.students[j+1].studentId) then
+				tempStudent := studentsTable.students[j];	
+				studentsTable.students[j] := studentsTable.students[j+1];
+				studentsTable.students[j+1] := tempStudent;
+			end if
+		end while
+	end while
+	{Finally, if we were allowed to use breaks we could make this faster by}
+	{saving a bool to if any values were swapped during a sort. If none were}
+	{swapped there is no need to iterate anymore since they are already sorted.}
+end action
+
+{Exercise 6}
+{...}
+{Exercise 7}
+{...}
+{Exercise 8}
+{...}
+action writeStudentsData(in studentsTable: tStudentsTable)
+	var
+		i: integer;
+	end var
+	if studentsTable.nStudents = 0 then
+		writeString(“STUDENT LIST EMPTY”);
+	else
+		writeString(ID NAME CAA_MARK PR_MARK N_CAA N_PR FINAL_MARK ABSENT?(1=YES)”);
+		writeString(“--------------------------------------------------------------------------------------------------------------------”);
+		for i := 1 to studentsTable.nStudents do
+			writeInteger(studentsTable.students[i].studentId);
+			writeString(studentsTable.students[i].name);
+			writeReal(studentsTable.students[i].caaMark);
+			writeReal(studentsTable.students[i].prMark);
+			writeInteger(studentsTable.students[i]nCaa);
+			writeInteger(studentsTable.students[i]nPr);
+			writeReal(studentsTable.students[i].finalMark);
+			writeBoolean(studentsTable.students[i].absent);
+		end for
+	end if
+end action
+
+algorithm UOCSubjectGrade
+	var
+		studentsTable: tStudentsTable;
+		i, studentId: integer;
+		filename: string;
+		isRead, found: boolean;
+		approvedPercent: real;;
+		{...}
+	end var
+	{Load data from file}
+	writeString("LOAD DATA FROM FILE. ENTER FILE NAME >>");
+	filename := readString();
+	studentsLoadDataFromFile(filename, studentsTable, isRead);
+	if isRead then
+		writeString("RESULTS:");
+		for i := 1 to studentsTable.nStudents do
+			{Exercise 2}
+			{...}
+			{Exercise 3}
+			{...}
+		end for
+		{Exercise 4}
+		{...}
+		writeString(“STUDENTS MARKS”);
+		writeString(“==================”);
+		{...}
+		{Exercise 5}
+		{...}
+		writeString(“STUDENTS SORTED BY FINAL MARK”);
+		writeString(“===================================”);
+		{...}
+		{Exercise 6}
+		{...}
+		writeString(“Percent students approved: “);
+		writeReal(approvedPercent);
+		{Exercise 7}
+		{...}
+		writeString(“STUDENTS IN HONOR LIST”);
+		writeString(“=========================”);
+		{...}
+		{Exercise 8}
+		writeString("SELECT STUDENT BY ID >>");
+		studentId := readInteger();
+		{...}
+		if found then
+			writeString("STUDENT IN HONOR LIST");
+		else
+			writeString("STUDENT NOT IN HONOR LIST");
+		end if
+	else
+		writeString("NO STUDENTS RECOVERED");
+	end if
+end algorithm
