@@ -1,10 +1,11 @@
 /*
-* File: main.c
+* File: grades.c
 * Author: Ivan Miranda Moral
 * Course: 20241
 * Description: PR4
 */
 
+/* System header files */
 #include "grades.h"
 
 /* Function to load student data from file */
@@ -127,6 +128,9 @@ void	calculateStudentCaaAndPr(tStudent *student){
 	student->nCaa = 0;
 	student->nPr = 0;
 
+	/* While iterating amongst the activities, if they were SUBMITTED, we get
+	 * the type and the weight to figure out its value in the weighted caa and
+	 * pr averages */
 	while (i < NUM_ACTIVITIES){
 		activityTypeWeight(student->activities[i].name, &actType, &actWeight);
 		if (student->activities[i].state == SUBMITTED){
@@ -145,9 +149,15 @@ void	calculateStudentCaaAndPr(tStudent *student){
 /* Exercise 3 */
 /* Action that calculates student's final mark and NP registry */
 void	calculateFinalMarkAndAbsent(tStudent *student){
+	/* This algorithm checks various conditions to get the final mark */
+
+	/* If the weighted average of the CAA activities is below a 4, the student
+	 * fails */
 	if (student->caaMark < MIN_C){
 		student->finalMark = student->caaMark;
 	} else {
+		/* If the weighted average of the PR activities is below a 5, the student
+		* fails */
 		if (student->prMark < MIN_C_PLUS){
 			student->finalMark = student->prMark;
 		} else {
@@ -155,9 +165,13 @@ void	calculateFinalMarkAndAbsent(tStudent *student){
 			student->finalMark += student->prMark * (float)FINAL_PR_WEIGHT/PERCENT; 
 		}
 	}
+	/* Even if the finalMark is a passing grade, if any PR activity was not
+	 * turned in, the student fails */
 	if (student->finalMark >= MIN_C_PLUS && student->nPr < NUM_PR_ACTIVITIES){
 		student->finalMark = MIN_C;	
 	}
+	/* Finally, if the amount of activities turned in is below the minimum, the
+	 * student will be marked as absent */
 	if (student->nCaa < MIN_NUM_CAA_ACTIVITIES && student->nPr < MIN_NUM_PR_ACTIVITIES){
 		student->absent = true;
 	}
@@ -166,12 +180,19 @@ void	calculateFinalMarkAndAbsent(tStudent *student){
 /* Exercise 4 */
 /* Action that writes a student's ID, grade and NP in a file */
 void	writeStudentsTableToFile(tStudentsTable *studentsTable, const char *filename){
+	/* I included the filename parameter to make the function more universal. I
+	 * didn't want to hard code "grades.txt" in the function so if it was to be
+	 * used in some other exercise, I could define the filename with a string
+	 * literal. */
 	int	i;
-	FILE* fileToWrite;
+	FILE *fileToWrite = 0;
 
 	i = 0;
 	fileToWrite = fopen(filename, "w");
 	while(i < studentsTable->nStudents){
+		/* While the fprintf function can pass multiple arguments, I have chosen
+		 * to pass only one argument per function call to visualize the code as
+		 * written in the pseudocode */
 		fprintf(fileToWrite, "%d ", studentsTable->students[i].studentId);
 		fprintf(fileToWrite, "%s ", studentsTable->students[i].name);
 		fprintf(fileToWrite, "%.2f ", studentsTable->students[i].caaMark);
@@ -191,21 +212,33 @@ void	sortStudentsTable(tStudentsTable *studentsTable){
 	int i, j;
 	tStudent tempStudent;
 	
+	/* A simple bubble sort algorithm */
+	/* We initialize i to nStudents - 1 to avoid the segmentation fault when
+	 * checking the next student in the array. */
 	i = studentsTable->nStudents - 1;
+	/* This first while defines how many students we should check in the inner
+	 * loop */
 	while (i > 0){
 		j = 0;
+		/* Every time we iterate through the students, since the last place will
+		 * have the correct student, we don't need to check it again. i-- after
+		 * every completed sort allows us to sort faster. */
 		while (j < i){
-			if ((studentsTable->students[j].finalMark < studentsTable->students[j + 1].finalMark) 
-				|| ((studentsTable->students[j].finalMark == studentsTable->students[j + 1].finalMark)
-					&& (studentsTable->students[j].studentId > studentsTable->students[j + 1].studentId))){
+			if ((studentsTable->students[j].finalMark < studentsTable->students[j+1].finalMark) 
+				|| ((studentsTable->students[j].finalMark == studentsTable->students[j+1].finalMark)
+					&& (studentsTable->students[j].studentId > studentsTable->students[j+1].studentId))){
 				tempStudent = studentsTable->students[j];	
-				studentsTable->students[j] = studentsTable->students[j + 1];
-				studentsTable->students[j + 1] = tempStudent;
+				studentsTable->students[j] = studentsTable->students[j+1];
+				studentsTable->students[j+1] = tempStudent;
 			}
 			j++;
 		}
 		i--;
 	}
+	/* Finally, if we were allowed to use breaks we could make this faster by
+	 * saving a bool to if any values were swapped during a sort. If none were
+	 * swapped there is no need to iterate anymore since they are already
+	 * sorted. */
 }
 
 /* Exercise 6 */ 
@@ -214,9 +247,11 @@ float	getPassingPercentage(tStudentsTable studentsTable){
 	float passedPercent;
 	int i, totalPassed;
 
+	/* Initialization */
 	i = 0;
 	totalPassed = 0;
 
+	/* Iterate amongst the students to see who passed */
 	while (i < studentsTable.nStudents){
 		if (studentsTable.students[i].finalMark >= MIN_C_PLUS){
 			totalPassed++;	
@@ -224,6 +259,7 @@ float	getPassingPercentage(tStudentsTable studentsTable){
 		i++;
 	}
 
+	/* Calculate the percentage */
 	passedPercent = (float)totalPassed/(float)studentsTable.nStudents * PERCENT;
 
 	return passedPercent;
@@ -233,7 +269,13 @@ float	getPassingPercentage(tStudentsTable studentsTable){
 /* Action that obtains students candidates to honors */
 void	getHonorsCandidates(tStudentsTable *studentsTable, tStudentsTable *honorsTable){
 	int	i = 0;
-
+	
+	/* Need to initialize nStudents to 0 in order to iterate amongst the
+	 * students properly. The first time I uploaded this I didn't realize I
+	 * needed this because on Apple Silicon, both gcc and cc seem to initialize
+	 * the value on compilation by default. While the project was running
+	 * correctly in my terminal, it didn't work in DSLab */
+	honorsTable->nStudents = 0;
 	while (i < studentsTable->nStudents){
 		/* Minimum finalMark for Honors is 9.0 */
 		if (studentsTable->students[i].finalMark >= MIN_A){
@@ -252,6 +294,8 @@ bool studentIsHonors(int studentId, tStudentsTable *honorsTable){
 	bool isHonors = false;
 	int	i = 0;
 
+	/* We compare the studentId parameter with all of the students in the honors
+	 * table, if there is a match, return true */
 	while (i < honorsTable->nStudents){
 		if (honorsTable->students[i].studentId == studentId){
 			isHonors = true;

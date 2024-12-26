@@ -11,7 +11,6 @@
 /*Constant for file reading */
 #define MAX_FILE_NAME 100+1
 
-
 /* main */
 int main(int argc, char **argv)
 {
@@ -20,7 +19,7 @@ int main(int argc, char **argv)
 	int i, studentId;
 	
 	char filename[MAX_FILE_NAME];
-	/* passed is a better word rather than approved, but in order to follow the rules I won't change it. */
+	/* Passed is a better word rather than approved, but in order to follow the rules I won't change it. */
 	float approvedPercent = 0.0;
 	
 	bool isRead = false;
@@ -58,7 +57,7 @@ int main(int argc, char **argv)
 
 		/* Exercise 6 */
 		approvedPercent = getPassingPercentage(studentsTable);
-		/* Again, approved really should be passed.  Not changing it because of DSLab */
+		/* Again, approved really should be passed.  Not changing it because of the DSLab output */
 		printf("\nPercent students approved: %.2f\n", approvedPercent);
 
 		/* Exercise 7 */
