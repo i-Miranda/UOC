@@ -153,8 +153,10 @@ end function
 {Exercise 2}
 {Action to calculate a student's CAA and PR marks and number of activities}
 action	calculateStudentCaaAndPr(out student: tStudent)
-	actType := tActivityType; 
-	actWeight, i := integer;
+	var
+		actType := tActivityType; 
+		actWeight, i := integer;
+	end var
 
 	{Initialization before loop}
 	i := 1;
@@ -195,12 +197,12 @@ action	calculateFinalMarkAndAbsent(out student: tStudent)
 		else
 			student.finalMark := student.caaMark 
 				* integerToReal(FINAL_CAA_WEIGHT)/PERCENT; 
-			student.finalMark := student.finalMark + student->prMark 
+			student.finalMark := student.finalMark + student.prMark 
 				* integerToReal(FINAL_PR_WEIGHT)/PERCENT; 
 		end if
 	end if
 	{Even if the finalMark is a passing grade, if any PR activity was not turned in, the student fails}
-	if student.finalMark >= MIN_C_PLUS and student->nPr < NUM_PR_ACTIVITIES then
+	if student.finalMark >= MIN_C_PLUS and student.nPr < NUM_PR_ACTIVITIES then
 		student.finalMark := MIN_C;	
 	end if
 	{Finally, if the amount of activities turned in is below the minimum, the student will be marked as absent}
@@ -210,7 +212,7 @@ action	calculateFinalMarkAndAbsent(out student: tStudent)
 end action
 
 {Exercise 4}
-/* Action that writes a student's ID, grade and NP in a file */
+{Action that writes a student's ID, grade and NP in a file}
 action	writeStudentsTableToFile(tStudentsTable *studentsTable, const char *filename){
 	{I included the filename parameter to make the function more universal. I}
 	{didn't want to hard code "grades.txt" in the function so if it was to be}
@@ -253,8 +255,8 @@ action	sortStudentsTable(in studentsTable: tStudentsTable) then
 	while i > 0 do
 		j := 0;
 		{Every time we iterate through the students, since the last place will}
-		{have the correct student, we don't need to check it again. i-- after}
-		{every completed sort allows us to sort faster.}
+		{have the correct student, we don't need to check it again. Reduce i by}
+		{1 after every completed sort allows us to sort faster.}
 		while j < i do
 			if studentsTable.students[j].finalMark < studentsTable.students[j+1].finalMark or
 				(studentsTable.students[j].finalMark = studentsTable.students[j+1].finalMark and
@@ -271,15 +273,78 @@ action	sortStudentsTable(in studentsTable: tStudentsTable) then
 end action
 
 {Exercise 6}
-{...}
+{Function that calculates percent of students who have passed}
+function	getPassingPercentage(studentsTable: tStudentsTable): real
+	var
+		passedPercent: real;
+		i, totalPassed: integer;
+	end var
+
+	{Initialization}
+	i := 0;
+	totalPassed := 0;
+
+	{Iterate amongst the students to see who passed}
+	while i < studentsTable.nStudents do
+		if studentsTable.students[i].finalMark >= MIN_C_PLUS then
+			totalPassed++;	
+		end if
+	end while
+
+	{Calculate the percentage}
+	passedPercent := integerToReal(totalPassed)/integerToReal(studentsTable.nStudents) * PERCENT;
+
+	return passedPercent;
+end function
+
 {Exercise 7}
-{...}
+{Action that obtains students candidates to honors}
+action	getHonorsCandidates(in studentsTable: tStudentsTable, out honorsTable: tStudentsTable)
+	var
+		i : integer = 0;
+	end var
+	
+	{Need to initialize nStudents to 0 in order to iterate amongst the}
+	{students properly. The first time I uploaded this I didn't realize I}
+	{needed this because on Apple Silicon, both gcc and cc seem to initialize}
+	{the value on compilation by default. While the project was running correctly}
+	{in my terminal, it didn't work in DSLab}
+	honorsTable.nStudents := 0;
+	while i < studentsTable.nStudents do
+		{Minimum finalMark for Honors is 9.0}
+		if studentsTable.students[i].finalMark >= MIN_A then
+			{Add student to honors table}
+			honorsTable.students[honorsTable.nStudents] := studentsTable.students[i];
+			{Increment the counter.}
+			honorsTable.nStudents := honorsTable.nStudents + 1; 						
+		end if
+	end while
+end function
+
 {Exercise 8}
-{...}
+/* Function that tests if a student is in honors table */
+function studentIsHonors(in studentId: integer, in honorsTable: tStudentsTable): boolean
+	var
+		isHonors: boolean = false;
+		i: integer = 0;
+	end var
+
+	{We compare the studentId parameter with all of the students in the honors}
+	{table, if there is a match, return true}
+	while i < honorsTable.nStudents do
+		if honorsTable.students[i].studentId = studentId then
+			isHonors := true;
+		end if
+	end while
+	return isHonors; 
+end function
+
+{Action that writes a student's ID, grade and NP registry}
 action writeStudentsData(in studentsTable: tStudentsTable)
 	var
 		i: integer;
 	end var
+
 	if studentsTable.nStudents = 0 then
 		writeString(“STUDENT LIST EMPTY”);
 	else
@@ -303,51 +368,63 @@ algorithm UOCSubjectGrade
 		studentsTable: tStudentsTable;
 		i, studentId: integer;
 		filename: string;
+		/* Passed is a better word rather than approved, but in order to follow the rules I won't change it. */
+		approvedPercent: real;
 		isRead, found: boolean;
-		approvedPercent: real;;
-		{...}
 	end var
+
 	{Load data from file}
 	writeString("LOAD DATA FROM FILE. ENTER FILE NAME >>");
 	filename := readString();
+
+    {Exercise 1}
 	studentsLoadDataFromFile(filename, studentsTable, isRead);
+
+	{Data successfully loaded}
 	if isRead then
 		writeString("RESULTS:");
 		for i := 1 to studentsTable.nStudents do
 			{Exercise 2}
-			{...}
+			calculateStudentCaaAndPr(studentsTable.students[i]);
 			{Exercise 3}
-			{...}
+			calculateFinalMarkAndAbsent(studentsTable.students[i]);
 		end for
+
 		{Exercise 4}
-		{...}
+		writeStudentsTableToFile(studentsTable, "grades.txt");
 		writeString(“STUDENTS MARKS”);
 		writeString(“==================”);
-		{...}
+		writeStudentsData(studentsTable);
+
 		{Exercise 5}
-		{...}
+		sortStudentsTable(studentsTable);
 		writeString(“STUDENTS SORTED BY FINAL MARK”);
 		writeString(“===================================”);
-		{...}
+		writeStudentsData(studentsTable);
+
 		{Exercise 6}
-		{...}
+		approvedPercent := getPassingPercentage(studentsTable);
+		{Again, approved really should be passed.  Not changing it because of the DSLab output}
 		writeString(“Percent students approved: “);
 		writeReal(approvedPercent);
+
 		{Exercise 7}
-		{...}
+		getHonorsCandidates(studentsTable, honorsTable); 
 		writeString(“STUDENTS IN HONOR LIST”);
 		writeString(“=========================”);
-		{...}
+		writeStudentsData(honorsTable);
+
 		{Exercise 8}
 		writeString("SELECT STUDENT BY ID >>");
 		studentId := readInteger();
-		{...}
+		found := studentIsHonors(studentId, honorsTable);
 		if found then
 			writeString("STUDENT IN HONOR LIST");
 		else
 			writeString("STUDENT NOT IN HONOR LIST");
 		end if
 	else
+		{No data recovered}
 		writeString("NO STUDENTS RECOVERED");
 	end if
 end algorithm

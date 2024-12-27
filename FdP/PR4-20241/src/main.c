@@ -17,13 +17,10 @@ int main(int argc, char **argv)
 	tStudentsTable studentsTable;
 	tStudentsTable honorsTable;
 	int i, studentId;
-	
 	char filename[MAX_FILE_NAME];
 	/* Passed is a better word rather than approved, but in order to follow the rules I won't change it. */
 	float approvedPercent = 0.0;
-	
-	bool isRead = false;
-    bool found = false;
+	bool isRead, found = false;
 	
 	/* load data from file*/ 
     printf("LOAD DATA FROM FILE. ENTER FILE NAME >>\n");

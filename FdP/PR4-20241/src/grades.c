@@ -220,8 +220,8 @@ void	sortStudentsTable(tStudentsTable *studentsTable){
 	while (i > 0){
 		j = 0;
 		/* Every time we iterate through the students, since the last place will
-		 * have the correct student, we don't need to check it again. i-- after
-		 * every completed sort allows us to sort faster. */
+		 * have the correct student, we don't need to check it again. Reduce i by
+		 * 1 after every completed sort allows us to sort faster. */
 		while (j < i){
 			if ((studentsTable->students[j].finalMark < studentsTable->students[j+1].finalMark) || 
 				((studentsTable->students[j].finalMark == studentsTable->students[j+1].finalMark) && 
@@ -272,8 +272,8 @@ void	getHonorsCandidates(tStudentsTable *studentsTable, tStudentsTable *honorsTa
 	/* Need to initialize nStudents to 0 in order to iterate amongst the
 	 * students properly. The first time I uploaded this I didn't realize I
 	 * needed this because on Apple Silicon, both gcc and cc seem to initialize
-	 * the value on compilation by default. While the project was running
-	 * correctly in my terminal, it didn't work in DSLab */
+	 * the value on compilation by default. While the project was running correctly 
+	 * in my terminal, it didn't work in DSLab */
 	honorsTable->nStudents = 0;
 	while (i < studentsTable->nStudents){
 		/* Minimum finalMark for Honors is 9.0 */
