@@ -306,7 +306,7 @@ void subscriptions_del(tSubscriptions* data, int id) {
     
     if (pos >= 0) {
         // Remove current position memory
-        free(&(data->elems[pos]));
+        data->elems = (tSubscription*)realloc(data->elems, data->count * sizeof(tSubscription));
         // Shift elements 
         for(i = pos; i < data->count-1; i++) {
             // Copy address of element on position i+1 to position i
@@ -351,10 +351,10 @@ void subscriptions_free(tSubscriptions* data) {
     // Ex2
 	assert(data != NULL);
 
-	while (data->count >= 0 && &data->elems[data->count] != NULL) {
-		free(&data->elems[data->count]);
+	while (data->count >= 0 && &(data->elems[data->count]) != NULL) {
 		data->count--;
 	}
+	free(data->elems);
 	data->elems = NULL;
 	data->count = 0;
 }
