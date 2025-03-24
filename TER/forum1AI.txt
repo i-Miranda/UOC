@@ -1,0 +1,39 @@
+"...people should be alarmed by how development in AI may promote unfairness in
+academic evaluations. Tools that could effectively combat these new models,
+especially those that can be used off the shelf, urgently need to be developed
+to foster academic fairness in this new era." (Yunkai Xiao, 2022)
+
+Es obvio que la evolución de la tecnología, con todos los beneficios que aporta
+al avance, también puede perjudicar el status quo. El caso de Leo es un claro
+ejemplo de esto. Con el desarrollo del IA y texto autogenerado, ChatGPT y los
+demás modelos que ya existen al alcance de cualquier persona con un ordenador,
+parece que las reglas del juego han cambiado.
+
+No es la primera ni será la ultima forma de hacer trampa en el ámbito académico
+pero si es verdad que controlar el uso de IA parece algo imposible si el usuario 
+de dicha tecnología implementa un ojo critico sobre el texto que ha solicitado 
+ser generado. Una búsqueda rápida en Google y se puede encontrar múltiples 
+formas de ofuscar el uso de IA sin requerir ningún esfuerzo ni de parafrasear 
+por parte de la persona solicitando el texto (Reddit, 2022). Esta claro que el 
+caso de Leo es un uso incorrecto del software disponible pero la realidad es que 
+existe y en el futuro se desarrollaran modelos mejores y métodos mas eficientes 
+para evitar la detección de este tipo de abuso.
+
+Hay un acuerdo entre un profesor y un alumno sobre el desarrollo honesto de su
+trabajo que parece ser una farsa por parte de los dos lados. Un alumno que 
+quiera eludir a un evaluador siempre encontrara la forma de conseguirlo. Un 
+profesor puede utilizar una plataforma como Turnitin para intentar detectarlo 
+pero como el IA, tampoco es infalible. Los dos lados utilizan las herramientas 
+que tienen disponibles para agilizar su carga de trabajo y conseguir sus metas 
+personales. Dicho esto, el esfuerzo requerido por un profesor para prevenir la 
+trampa seria mejor implementado en enseñar al alumno que quiera aprender y no a 
+parar al que busca un aprobado sin haber aprendido.
+
+Quizás el esfuerzo para detectar estas trampas se puede reservar para el
+desarrollo de nuevas formas de evaluar el trabajo y la retención de la materia 
+del alumnado. Aunque el prestigio de un titulo pueda ser cuestionado por la 
+facilidad de sacarlo, con o sin trampa, no debería ser responsabilidad del 
+profesorado y/o una universidad detectarlo. La realidad es que un titulo no 
+dicta si uno será bueno en el campo que ha elegido, y una nota no siempre 
+demuestra el control de la materia de un alumno. El fair-play solo puede existir 
+si todos se comprometen a participar en ello. 

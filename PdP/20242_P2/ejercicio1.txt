@@ -1,0 +1,45 @@
+const
+	MAX_PEOPLE: integer = 100;
+	MAX_SUBSCRIPTIONS: integer = 50;
+end const
+
+type
+	subscriptionPlan = {FREE, STANDARD, PREMIUM}
+
+	tDate = record
+		day: integer;
+		month: integer;
+		year: integer;
+	end record
+
+	tPerson = record
+		document: string;
+		name: string;
+		surname: string;
+		phone: string;
+		email: string;
+		address: string;
+		cp: string;
+		birthday: tDate;
+	end record
+
+	tPeople = record
+		elems: vector [MAX_PEOPLE] of tPerson;
+		count: integer;
+	end record
+	
+	tSubscription = record
+		id: integer;
+		document: string;
+		startDate: tDate;
+		endDate: tDate;
+		plan: subscriptionPlan;
+		price: real;
+		numDevices: integer;
+	end record
+
+	tSubscriptions = record
+		elems: vector [MAX_SUBSCRIPTIONS] of tSubscription;
+		count: integer;
+	end record
+end type

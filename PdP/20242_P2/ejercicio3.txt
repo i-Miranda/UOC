@@ -1,0 +1,9 @@
+{ Pre: data = DATA ʌ DATA ∈ tSubscriptions }
+action	subscriptions_init(in data: tSubscriptions)
+{ Post: data.count = 1 }
+
+{ Pre: data = DATA ʌ entry = ENTRY ʌ csv_numFields(entry) = 7 ʌ ∃csv_getType(entry) ʌ ∃entry.fields}
+action	subscription_parse(out data: tSubscriptions data, in entry: tCSVEntry)
+
+{ Pre: data = DATA ʌ data ∈ tSubscriptions ʌ people = PEOPLE ^ people ∈ tPeople ʌ subscription = SUBSCRIPTION ʌ subscription ∈ tSubscription}
+action	subscriptions_add(out data: tSubscriptions, in people: tPeople, int subscription: tSubscription)
