@@ -7,7 +7,6 @@
 //////////////////////////////////
 // Available methods
 //////////////////////////////////
-
 // Parse a tDate from string information
 void date_parse(tDate* date, const char* s_date) {
     // Check output data
@@ -349,10 +348,9 @@ void subscriptions_free(tSubscriptions* data) {
     // Ex2
 	assert(data != NULL);
 
-	while (data->count >= 0 && &(data->elems[data->count]) != NULL) {
-		data->count--;
+	if (data->count > 0 && &(data->elems[data->count - 1]) != NULL) {
+		free(data->elems);
 	}
-	free(data->elems);
 	data->elems = NULL;
 	data->count = 0;
 }
