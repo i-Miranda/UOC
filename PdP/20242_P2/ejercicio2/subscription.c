@@ -305,8 +305,6 @@ void subscriptions_del(tSubscriptions* data, int id) {
     pos = subscriptions_find(data[0], id);
     
     if (pos >= 0) {
-        // Remove current position memory
-        data->elems = (tSubscription*)realloc(data->elems, data->count * sizeof(tSubscription));
         // Shift elements 
         for(i = pos; i < data->count-1; i++) {
             // Copy address of element on position i+1 to position i
