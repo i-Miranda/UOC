@@ -92,10 +92,12 @@ tApiError api_addPerson(tApiData* data, tCSVEntry entry) {
 	tPerson		person;
 
 	assert(data != NULL && &entry != NULL);	
-	if (csv_numFields(entry) != NUM_FIELDS_PERSON)
+	if (csv_numFields(entry) != NUM_FIELDS_PERSON) {
 		return E_INVALID_ENTRY_FORMAT;
-	if (strcmp(csv_getType(&entry), "PERSON") != 0)
+	}
+	if (strcmp(csv_getType(&entry), "PERSON") != 0) {
 		return E_INVALID_ENTRY_TYPE;
+	}
 	person_parse(&person, entry);
 	apiError = people_add(&data->people, person);
 	/////////////////////////////////
@@ -150,6 +152,7 @@ int api_peopleCount(tApiData data) {
 	// PR1_3f
 	/////////////////////////////////
 	assert(&data != NULL);
+
 	return data.people.count;	
 	/////////////////////////////////
 }
@@ -160,6 +163,7 @@ int api_subscriptionsCount(tApiData data) {
 	// PR1_3f
 	/////////////////////////////////
 	assert(&data != NULL);
+
 	return data.subscriptions.count;	
 	/////////////////////////////////
 }
@@ -170,6 +174,7 @@ int api_filmsCount(tApiData data) {
 	// PR1_3f
 	/////////////////////////////////
 	assert(&data != NULL);
+
 	return data.catalog.filmList.count;	
 	/////////////////////////////////
 }
@@ -180,6 +185,7 @@ int api_freeFilmsCount(tApiData data) {
 	// PR1_3f
 	/////////////////////////////////
 	assert(&data != NULL);
+
 	return data.catalog.freeFilmList.count;	
 	/////////////////////////////////
 }
@@ -203,7 +209,9 @@ tApiError api_addDataEntry(tApiData* data, tCSVEntry entry) {
 	/////////////////////////////////
 	// PR1_3h
 	/////////////////////////////////
+	// numFields is used to verify which data type 
 	int			numFields;
+	// Using void * to avoid declaring different pointer types for each case
 	void		*ptr;
 	tApiError	apiError;
 
@@ -239,8 +247,10 @@ tApiError api_getSubscription(tApiData data, int id, tCSVEntry *entry) {
 	int			subscriptionIndex;
 
 	assert(&data != NULL && entry != NULL);	
+	// First get the subscriptionIndex with subscriptions_find
 	subscriptionIndex = subscriptions_find(data.subscriptions, id);
 	if (subscriptionIndex != -1) {
+		// Then use the subscriptionIndex to get the buffer for the entry
 		subscriptions_get(data.subscriptions, subscriptionIndex, buffer);
 		csv_parseEntry(entry, buffer, "SUBSCRIPTION");	
 		return E_SUCCESS;
@@ -277,6 +287,7 @@ tApiError api_getFreeFilms(tApiData data, tCSVData *freeFilms) {
 	tFilm*		freeFilm;
 
 	assert(&data != NULL && freeFilms != NULL);	
+	// Iterate along the freeFilmList to add all of the data to freeFilms
 	while(data.catalog.freeFilmList.first != NULL) {
 		freeFilm = data.catalog.freeFilmList.first->elem;
 		if (freeFilm != NULL) {
@@ -298,6 +309,7 @@ tApiError api_getFilmsByGenre(tApiData data, tCSVData *films, int genre) {
 	tFilm*		film;
 
 	assert(&data != NULL && films != NULL);	
+	// Iterate along the filmList to add all of the data to films
 	while(data.catalog.filmList.first != NULL) {
 		film = &data.catalog.filmList.first->elem;
 		if (film != NULL && film->genre == genre) {
