@@ -1,3 +1,10 @@
+/*
+ * File: api.h
+ * Author: Ivan Miranda Moral
+ * Date: 05-04-2025
+ * Description: Header file for exercises for PR1
+ */
+
 #ifndef __UOCPLAY_API__H
 #define __UOCPLAY_API__H
 #include <stdbool.h>

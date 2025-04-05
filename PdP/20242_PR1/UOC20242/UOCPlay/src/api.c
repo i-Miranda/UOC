@@ -1,3 +1,10 @@
+/*
+ * File: api.c
+ * Author: Ivan Miranda Moral
+ * Date: 05-04-2025
+ * Description: Available methods and exercises for PR1
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>

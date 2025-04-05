@@ -1,3 +1,10 @@
+/*
+ * File: film.h
+ * Author: Ivan Miranda Moral
+ * Date: 05-04-2025
+ * Description: Header file for exercises for PR1
+ */
+
 #ifndef __FILM_H__
 #define __FILM_H__
 #include <stdbool.h>
