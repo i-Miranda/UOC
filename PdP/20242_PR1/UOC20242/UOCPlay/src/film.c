@@ -439,12 +439,9 @@ tApiError catalog_free(tCatalog* catalog) {
 	/////////////////////////////////
 	assert(catalog != NULL);	
 
-	if (&catalog->filmList != NULL) {
-		filmList_free(&catalog->filmList);
-	}
-	if (&catalog->freeFilmList != NULL) {
-		freeFilmsList_free(&catalog->freeFilmList);
-	}
+	filmList_free(&catalog->filmList);
+	freeFilmsList_free(&catalog->freeFilmList);
+	catalog_init(catalog);
 	/////////////////////////////////
     return E_SUCCESS;
 }

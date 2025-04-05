@@ -5,8 +5,8 @@
   <TabInfoArray Name="TabInfoArray">
     <TabInfo>
       <wxString Value="/home/ivan/UOC20242/UOCPlay/src/film.c" Name="FileName"/>
-      <int Value="0" Name="FirstVisibleLine"/>
-      <int Value="0" Name="CurrentLine"/>
+      <int Value="440" Name="FirstVisibleLine"/>
+      <int Value="441" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
@@ -19,8 +19,8 @@
     </TabInfo>
     <TabInfo>
       <wxString Value="/home/ivan/UOC20242/UOCPlay/src/api.c" Name="FileName"/>
-      <int Value="191" Name="FirstVisibleLine"/>
-      <int Value="193" Name="CurrentLine"/>
+      <int Value="85" Name="FirstVisibleLine"/>
+      <int Value="86" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>

@@ -107,6 +107,7 @@ tApiError api_addPerson(tApiData* data, tCSVEntry entry) {
 	}
 	person_parse(&person, entry);
 	apiError = people_add(&data->people, person);
+	person_free(&person);
 	/////////////////////////////////
     return apiError;
 }
@@ -149,6 +150,7 @@ tApiError api_addFilm(tApiData* data, tCSVEntry entry) {
 	}
 	film_parse(&film, entry);
 	apiError = catalog_add(&data->catalog, film);
+	film_free(&film);
 	/////////////////////////////////
     return apiError;
 }
@@ -217,24 +219,19 @@ tApiError api_addDataEntry(tApiData* data, tCSVEntry entry) {
 	// PR1_3h
 	/////////////////////////////////
 	// numFields is used to verify which data type 
-	int			numFields;
-	// Using void * to avoid declaring different pointer types for each case
-	void		*ptr;
-	tApiError	apiError;
+	int				numFields;
+	tApiError		apiError;
 
 	assert(data != NULL && &entry != NULL);
 	numFields = csv_numFields(entry);	
 	if (numFields == NUM_FIELDS_PERSON) {
-		person_parse((tPerson*)ptr, entry);	
-		apiError = people_add(&data->people, *(tPerson*)ptr); 
+		apiError = api_addPerson(data, entry); 
 	} else {
 		if (numFields == NUM_FIELDS_SUBSCRIPTION) {
-			subscription_parse((tSubscription*)ptr, entry);	
-			apiError = subscriptions_add(&data->subscriptions, data->people, *(tSubscription*)ptr);  
+			apiError = api_addSubscription(data, entry);
 		} else {
 			if (numFields == NUM_FIELDS_FILM) {
-				film_parse((tFilm*)ptr, entry);
-				apiError = catalog_add(&data->catalog,*(tFilm*)ptr);
+				apiError = api_addFilm(data, entry);
 			} else {
 				apiError = E_INVALID_ENTRY_FORMAT;
 			}

@@ -22,7 +22,7 @@ typedef struct _ApiData {
 	// PR1_3a
 	/////////////////////////////////
 	tPeople 		people;    
-	tSubscriptions subscriptions;    
+	tSubscriptions	subscriptions;    
 	tCatalog		catalog;
     /////////////////////////////////
 } tApiData;
