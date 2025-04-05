@@ -1,3 +1,10 @@
+/*
+ * File: subscription.c
+ * Author: Ivan Miranda Moral
+ * Date: 24-03-2025
+ * Description: Available methods and exercises for PEC2
+ */
+
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>

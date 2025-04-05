@@ -1,3 +1,10 @@
+/*
+ * File: subscription.h
+ * Author: Ivan Miranda Moral
+ * Date: 24-03-2025
+ * Description: Header file for exercises for PEC2
+ */
+
 #ifndef __SUBSCRIPTION_H__
 #define __SUBSCRIPTION_H__
 #include "csv.h"
@@ -46,7 +53,7 @@ typedef struct _tSubscription {
 
 // Ex 1 and 2: change this to dynamic memory
 typedef struct _tSubscriptions {
-    tSubscription *elems;
+    tSubscription* elems;
     int count;
 } tSubscriptions;
 
