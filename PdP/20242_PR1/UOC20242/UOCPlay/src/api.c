@@ -83,6 +83,7 @@ tApiError api_initData(tApiData* data) {
 
 	assert(data != NULL);	
 
+	//putting mallocs inside stack allocated data is asking for trouble
 	apiError = people_init(&data->people);
 	apiError = subscriptions_init(&data->subscriptions);
 	apiError = catalog_init(&data->catalog);
@@ -160,9 +161,12 @@ int api_peopleCount(tApiData data) {
 	/////////////////////////////////
 	// PR1_3f
 	/////////////////////////////////
+	int	count;
+
 	assert(&data != NULL);
 
-	return data.people.count;	
+	count = people_count(data.people);	
+	return count;
 	/////////////////////////////////
 }
 
@@ -171,9 +175,12 @@ int api_subscriptionsCount(tApiData data) {
 	/////////////////////////////////
 	// PR1_3f
 	/////////////////////////////////
+	int	count;
+
 	assert(&data != NULL);
 
-	return data.subscriptions.count;	
+	count = subscriptions_len(data.subscriptions);
+	return count;	
 	/////////////////////////////////
 }
 
@@ -182,9 +189,12 @@ int api_filmsCount(tApiData data) {
 	/////////////////////////////////
 	// PR1_3f
 	/////////////////////////////////
+	int count;
+
 	assert(&data != NULL);
 
-	return data.catalog.filmList.count;	
+	count = catalog_len(data.catalog);
+	return count;
 	/////////////////////////////////
 }
 
@@ -193,9 +203,12 @@ int api_freeFilmsCount(tApiData data) {
 	/////////////////////////////////
 	// PR1_3f
 	/////////////////////////////////
+	int	count;
+
 	assert(&data != NULL);
 
-	return data.catalog.freeFilmList.count;	
+	count = catalog_freeLen(data.catalog);
+	return count;
 	/////////////////////////////////
 }
 
@@ -218,11 +231,11 @@ tApiError api_addDataEntry(tApiData* data, tCSVEntry entry) {
 	/////////////////////////////////
 	// PR1_3h
 	/////////////////////////////////
-	// numFields is used to verify which data type 
 	int				numFields;
 	tApiError		apiError;
 
 	assert(data != NULL && &entry != NULL);
+	// numFields is used to verify which data type 
 	numFields = csv_numFields(entry);	
 	if (numFields == NUM_FIELDS_PERSON) {
 		apiError = api_addPerson(data, entry); 
