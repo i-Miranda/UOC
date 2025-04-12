@@ -415,9 +415,8 @@ int catalog_len(tCatalog catalog) {
 	/////////////////////////////////
 	assert(&catalog != NULL);	
 
-	return (catalog.filmList.count);
+	return catalog.filmList.count;
 	/////////////////////////////////
-    //return -1;
 }
 
 // Return the number of free films
@@ -427,9 +426,8 @@ int catalog_freeLen(tCatalog catalog) {
 	/////////////////////////////////
 	assert(&catalog != NULL);	
 
-	return (catalog.freeFilmList.count);
+	return catalog.freeFilmList.count;
 	/////////////////////////////////
-    //return -1;
 }
 
 // Remove the films from the catalog
