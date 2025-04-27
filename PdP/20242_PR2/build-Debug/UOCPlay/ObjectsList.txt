@@ -1,0 +1,1 @@
+../build-Debug/UOCPlay/src_watchstack.c.o ../build-Debug/UOCPlay/src_api.c.o ../build-Debug/UOCPlay/src_subscription.c.o ../build-Debug/UOCPlay/src_person.c.o ../build-Debug/UOCPlay/src_show.c.o ../build-Debug/UOCPlay/src_date.c.o ../build-Debug/UOCPlay/src_film.c.o ../build-Debug/UOCPlay/src_csv.c.o
