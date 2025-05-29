@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Session Name="/home/ivan/20242_PR2/UOC20242.workspace">
-  <int Value="3" Name="m_selectedTab"/>
+  <int Value="0" Name="m_selectedTab"/>
   <wxString Value="/home/ivan/20242_PR2/UOC20242.workspace" Name="m_workspaceName"/>
   <TabInfoArray Name="TabInfoArray">
     <TabInfo>
@@ -12,22 +12,22 @@
     </TabInfo>
     <TabInfo>
       <wxString Value="/home/ivan/20242_PR2/UOCPlay/src/api.c" Name="FileName"/>
-      <int Value="225" Name="FirstVisibleLine"/>
-      <int Value="233" Name="CurrentLine"/>
+      <int Value="201" Name="FirstVisibleLine"/>
+      <int Value="204" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
     <TabInfo>
       <wxString Value="/home/ivan/20242_PR2/UOCPlay/src/subscription.c" Name="FileName"/>
-      <int Value="116" Name="FirstVisibleLine"/>
-      <int Value="124" Name="CurrentLine"/>
+      <int Value="0" Name="FirstVisibleLine"/>
+      <int Value="0" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>
     <TabInfo>
       <wxString Value="/home/ivan/20242_PR2/UOCPlay/src/show.c" Name="FileName"/>
-      <int Value="83" Name="FirstVisibleLine"/>
-      <int Value="85" Name="CurrentLine"/>
+      <int Value="379" Name="FirstVisibleLine"/>
+      <int Value="381" Name="CurrentLine"/>
       <wxArrayString Name="Bookmarks"/>
       <IntVector Name="CollapsedFolds"/>
     </TabInfo>

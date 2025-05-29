@@ -1,10 +1,3 @@
-/*
- * File: watchstack.h
- * Author: Ivan Miranda Moral
- * Date: 02-05-2025
- * Description: Header file for exercises for PR2
- */
-
 #ifndef __WATCHSTACK_H__
 #define __WATCHSTACK_H__
 

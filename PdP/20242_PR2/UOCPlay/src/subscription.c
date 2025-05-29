@@ -1,3 +1,10 @@
+/*
+ * File: subscription.c
+ * Author: Ivan Miranda Moral
+ * Date: 02-05-2025
+ * Description:  subscription.c file for exercises for PR2
+ */
+
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
@@ -124,7 +131,6 @@ tApiError subscriptions_add(tSubscriptions* data, tPeople people, tSubscription 
     /////////////////////////////////
    	filmstack_init(&data->elems[data->count].watchlist); 
     
-    
     /////////////////////////////////
 	// Increase the number of elements
 	data->count++;
@@ -198,8 +204,7 @@ tApiError subscriptions_free(tSubscriptions* data) {
     /////////////////////////////////
     // PR2_2b
     /////////////////////////////////
-        
-        
+
     /////////////////////////////////
         free(data->elems);
     }

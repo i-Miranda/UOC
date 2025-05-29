@@ -1,10 +1,3 @@
-/*
- * File: api.h
- * Author: Ivan Miranda Moral
- * Date: 02-05-2025
- * Description: Header file for exercises for PR2
- */
-
 #ifndef __UOCPLAY_API__H
 #define __UOCPLAY_API__H
 #include <stdbool.h>
@@ -21,7 +14,7 @@
 // Type that stores all the application data
 typedef struct _ApiData {
     /////////////////////////////////
-	// PR1_3a
+	// Ex1 PR1 3a
 	/////////////////////////////////
     // People
     tPeople people;	
@@ -30,9 +23,10 @@ typedef struct _ApiData {
     // Catalog of films
     tFilmCatalog films;
    /////////////////////////////////
-	// PR2_3a
+	// Ex1 PR2 3a
 	/////////////////////////////////
-	tShowCatalog shows;    
+    // Catalog of shows
+    tShowCatalog shows;  
     /////////////////////////////////
 } tApiData;
 
@@ -53,9 +47,6 @@ tApiError api_addSubscription(tApiData* data, tCSVEntry entry);
 
 // Add a film if it does not exist
 tApiError api_addFilm(tApiData* data, tCSVEntry entry);
-
-// Add a show with one season and one episode (from CSV entry)
-tApiError api_addShow(tApiData* data, tCSVEntry entry);
 
 // Add a film to a subscription's watchlist from a CSV entry, avoiding duplicates
 tApiError api_addToWatchlist(tApiData* data, int subscriptionId, tCSVEntry entry);
@@ -78,6 +69,7 @@ int api_showsCount(tApiData data);
 // Find a show by its name
 tShow* api_findShow(tApiData data, const char* name);
 
+
 // Free all used memory
 tApiError api_freeData(tApiData* data);
 
@@ -95,5 +87,35 @@ tApiError api_getFreeFilms(tApiData data, tCSVData *freeFilms);
 
 // Get films data by genre
 tApiError api_getFilmsByGenre(tApiData data, tCSVData *films, int genre);
+
+// Get longest film
+tApiError api_getLongestFilm(tApiData data, tCSVEntry *entry);
+
+// Get longest free film
+tApiError api_getLongestFreeFilm(tApiData data, tCSVEntry *entry);
+
+// Get popular film
+tApiError api_getPopularFilm(tApiData data, tCSVEntry *entry);
+
+// Sort catalog by year, oldest to newest
+tApiError api_sortCatalogByYear(tApiData *data);
+
+// Sort catalog by rating, higehst to lowest
+tApiError api_sortCatalogByRating(tApiData *data);
+
+// Get longest film
+tApiError api_getOldestFilm(tApiData data, tCSVEntry *entry, bool free);
+
+// updateVipLevel of each person
+tApiError api_updateVipLevel(tApiData *data);
+
+// Sort people by VIP level, higehst to lowest
+tApiError api_sortPeopleByVipLevel(tApiData *data);
+
+// Sort people by document, lowest to highest
+tApiError api_sortPeopleByDocument(tApiData *data);
+
+// Get subscription data for the specified document
+tApiError api_getSubscriptionsByDocument(tApiData data, char *name, tCSVData *csvData);
 
 #endif // __UOCPLAY_API__H

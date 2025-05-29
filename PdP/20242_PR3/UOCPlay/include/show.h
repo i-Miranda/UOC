@@ -1,10 +1,3 @@
-/*
- * File: show.h
- * Author: Ivan Miranda Moral
- * Date: 02-05-2025
- * Description: Header file for exercises for PR2
- */
-
 #ifndef __SHOW_H__
 #define __SHOW_H__
 
@@ -182,5 +175,7 @@ tSeason* show_bestRatedSeason(tShowCatalog shows, const char* showName);
 
 // Return the show with the highest number of seasons
 tShow* show_mostSeasons(tShowCatalog shows);
+
+
 
 #endif // __SHOW_H__

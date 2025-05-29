@@ -1,3 +1,10 @@
+/*
+ * File: api.c
+ * Author: Ivan Miranda Moral
+ * Date: 02-05-2025
+ * Description:  api.c file for exercises for PR2
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -195,7 +202,8 @@ tApiError api_addShow(tApiData* data, tCSVEntry entry) {
 	/////////////////////////////////
 	// PR2_3f
 	/////////////////////////////////
-	tShow *show;
+	tShow show;
+	tApiError error;
 
 	assert(data != NULL);
 	assert(&entry != NULL);
@@ -203,12 +211,14 @@ tApiError api_addShow(tApiData* data, tCSVEntry entry) {
 	if (strcmp(csv_getType(&entry), "SHOW") != 0) {
 		return E_INVALID_ENTRY_TYPE;
 	}
-	show = malloc(1 * sizeof(tShow));
-	show_parse(show, entry);
-  	if (&show != NULL) {
-		return E_SUCCESS;
+    // Check the number of fields
+    if(csv_numFields(entry) != NUM_FIELDS_SHOW) {
+        return E_INVALID_ENTRY_FORMAT;
 	}
-    return E_MEMORY_ERROR;
+	show_parse(&show, entry);
+	error = showList_add(&(data->shows), show);
+	show_free(&show);
+	return error;
 }
 
 // Add a film to a subscription's watchlist from a CSV entry, avoiding duplicates
@@ -219,10 +229,11 @@ tApiError api_addToWatchlist(tApiData* data, int subscriptionId, tCSVEntry entry
 	int				subPosition;
 	tSubscription*	sub;
 	tFilm			film;
+	tApiError		error;
 
 	assert(data != NULL);
 
-	if (strcmp(csv_getType(&entry), "film") != 0) {
+	if (strcmp(csv_getType(&entry), "FILM") != 0) {
 		return E_INVALID_ENTRY_TYPE;
 	}
 	subPosition = subscriptions_find(data->subscriptions ,subscriptionId);
@@ -233,7 +244,9 @@ tApiError api_addToWatchlist(tApiData* data, int subscriptionId, tCSVEntry entry
 	film_parse(&film, entry);
 	if (&film == NULL)
 		return E_MEMORY_ERROR;
-	return filmstack_push(&sub->watchlist, film);
+	error = filmstack_push(&sub->watchlist, film);
+	film_free(&film);
+	return error;
 }
 
 // Get the number of people registered on the application

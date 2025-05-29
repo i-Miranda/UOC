@@ -1,10 +1,3 @@
-/*
- * File: watchstack.c
- * Author: Ivan Miranda Moral
- * Date: 02-05-2025
- * Description:  watchstack.c file for exercises for PR2
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,10 +11,10 @@ tApiError filmstack_init(tFilmstack* stack) {
     /////////////////////////////////
     // PR2_2c
     /////////////////////////////////
-	assert(stack != NULL);	
 
-  	stack->top = NULL;	 
-	stack->count = 0;
+    assert(stack != NULL);
+    stack->top = NULL;
+    stack->count = 0;
     return E_SUCCESS;
 }
 
@@ -30,40 +23,41 @@ bool filmstack_isEmpty(tFilmstack stack) {
     /////////////////////////////////
     // PR2_2d
     /////////////////////////////////
-	assert(&stack != NULL);
 
-	if (stack.count == 0) {
-		return true;
-	}
-    return false;
+    return stack.top == NULL;
 }
+
 
 // Adds a new film to the stack, unless it already exists
 tApiError filmstack_push(tFilmstack* stack, tFilm film) {
     /////////////////////////////////
     // PR2_2e
     /////////////////////////////////
-	tFilmstackNode* newNode;
-	tFilmstackNode* tempNode;
+    assert(stack != NULL);
 
-	assert(stack != NULL);
-	assert(&film != NULL);
+    // Check if the film already exists in the stack (by title)
+    tFilmstackNode* current = stack->top;
+    while (current != NULL) {
+        if (film_equals(current->elem, film)) {
+            // Film is already in the stack, do not add it
+            return E_FILM_ALREADY_EXISTS;
+        }
+        current = current->next;
+    }
 
-	tempNode = stack->top;
-	while (tempNode != NULL) {
-		if (film_equals(tempNode->elem, film)) {
-			return E_FILM_ALREADY_EXISTS;
-		}
-		tempNode = tempNode->next;
-	}
-	newNode = malloc(1 * sizeof(tFilmstackNode));
-	if (newNode == NULL) {
-		return E_MEMORY_ERROR;
-	}
-	film_cpy(&newNode->elem, film);
-	newNode->next = stack->top;
-	stack->top = newNode;
-	stack->count++;
+    // Allocate memory for the new node
+    tFilmstackNode* node = (tFilmstackNode*) malloc(sizeof(tFilmstackNode));
+    if (node == NULL)
+        return E_MEMORY_ERROR;
+
+    // Copy the film to the new node
+    film_cpy(&node->elem, film);
+
+    // Insert the node at the top of the stack
+    node->next = stack->top;
+    stack->top = node;
+    stack->count++;
+
     return E_SUCCESS;
 }
 
@@ -72,14 +66,10 @@ tFilm* filmstack_top(tFilmstack stack) {
     /////////////////////////////////
     // PR2_2f
     /////////////////////////////////
-	tFilm* film;
 
-	assert(&stack != NULL);
-  	 
-	if (filmstack_isEmpty(stack) == true) {
-    	return NULL;
-	}
-	return &stack.top->elem;
+    if (stack.top == NULL)
+        return NULL;
+    return &stack.top->elem;
 }
 
 // Removes the top film from the stack
@@ -87,18 +77,17 @@ tApiError filmstack_pop(tFilmstack* stack) {
     /////////////////////////////////
     // PR2_2g
     /////////////////////////////////
-	tFilmstackNode* tmp;
 
-	assert(stack != NULL);
+    assert(stack != NULL);
+    if (stack->top == NULL)
+        return E_STRUCTURE_EMPTY;
 
-	if (filmstack_isEmpty(*stack) == true) {
-		return E_STRUCTURE_EMPTY;
-	}
-	tmp = stack->top->next;	
-	free(stack->top->elem.name);
-	free(&stack->top->elem);
-	stack->top = tmp;
-	stack->count--;
+    tFilmstackNode* temp = stack->top;
+    stack->top = stack->top->next;
+    film_free(&temp->elem);
+    free(temp);
+    stack->count--;
+
     return E_SUCCESS;
 }
 
@@ -108,10 +97,8 @@ void filmstack_free(tFilmstack* stack) {
     // PR2_2f
     /////////////////////////////////
 
-	assert(stack != NULL);
-    
-	while (filmstack_isEmpty(*stack) == false) {
-		filmstack_pop(stack);
-	}
-	stack = NULL;
+    assert(stack != NULL);
+    while (!filmstack_isEmpty(*stack)) {
+        filmstack_pop(stack);
+    }
 }

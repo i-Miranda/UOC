@@ -1,15 +1,9 @@
-/*
- * File: show.c
- * Author: Ivan Miranda Moral
- * Date: 02-05-2025
- * Description:  show.c file for exercises for PR2
- */
-
 #include "show.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+
 
 // Parse input from CSVEntry
 // Parse input from CSVEntry and initialize a show with its season and episode
@@ -74,22 +68,31 @@ void show_parse(tShow* show, tCSVEntry entry) {
     season_free(&season);
 }
 
+
 // Initialize a show with the given name and an empty season list
 tApiError show_init(tShow* data, const char* name) {
     /////////////////////////////////
-	// PR2_1b
+	// PR2_1a
 	/////////////////////////////////
-	// Check preconditions
-	assert(data != NULL);
-	assert(name != NULL);
-	
-	// Name
-	data->name = (char*) malloc((strlen(name) + 1) * sizeof(char));
-	if (data->name == NULL){
-		return E_MEMORY_ERROR;
-	}
-	strcpy(data->name, name);
-    return seasonList_init(&data->seasons);
+    assert(data != NULL);
+    assert(name != NULL);
+
+    // Allocate memory for the show name and copy it
+    data->name = (char*)malloc((strlen(name) + 1) * sizeof(char));
+    if (data->name == NULL){       
+        return E_MEMORY_ERROR;
+        
+    }
+    strcpy(data->name, name);
+
+    // Initialize the season list for the show
+    if (seasonList_init(&data->seasons) != E_SUCCESS) {
+        free(data->name);
+        data->name = NULL;
+        return E_MEMORY_ERROR;
+    }
+
+    return E_SUCCESS;
 }
 
 // Initialize a season with the given number and release date
@@ -130,15 +133,10 @@ tApiError showList_init(tShowCatalog* list) {
     /////////////////////////////////
 	// PR2_1a
 	/////////////////////////////////
-   
-	// Check preconditions
-	assert(list != NULL);
-	
-	list->first = NULL;
-	list->last = NULL;
-	list->count = 0;
-	
-	return E_SUCCESS;
+    list->first = NULL;
+    list->last = NULL;
+    list->count = 0;
+    return E_SUCCESS;
 }
 
 // Initialize a season list
@@ -161,124 +159,133 @@ tApiError showList_add(tShowCatalog* list, tShow show) {
     /////////////////////////////////
 	// PR2_1f
 	/////////////////////////////////
-	tShowNode*		newShowNode;
-	tShow*			showFound;
-	tSeason*		seasonFound;
-	tSeasonNode*	tempSeasonNode;
-	tEpisodeNode*	tempEpisodeNode;
-	tApiError		error;
+    assert(list != NULL);
 
-	assert(list != NULL);
-	assert(&show != NULL);
+    // Try to find existing show
+    tShow* existingShow = showList_find(*list, show.name);
+    if (existingShow != NULL) {
+        // Merge incoming season and episodes
+        tSeasonNode* incomingSeasonNode = show.seasons.first;
+        assert(incomingSeasonNode != NULL);
 
-	// Try to find show by name
-	showFound = showList_find(*list, show.name);
-	// If it's not found, add it to the tShowCatalog
-	if (showFound == NULL) {
-		newShowNode = malloc(1 * sizeof(tShowNode));	
-		if (newShowNode == NULL) {
-			return E_MEMORY_ERROR;
-		}
-		error = show_cpy(&newShowNode->show, &show);
-		if (error != E_SUCCESS) {
-			// If show_cpy fails we need to free the newShowNode
-			free(newShowNode);
-			return error;
-		}
-		newShowNode->next = NULL;
-		if (list->first == NULL) {
-			list->first = newShowNode;	
-			newShowNode->prev = NULL;
-		}
-		else {
-			list->last->next = newShowNode;
-			newShowNode->prev = list->last;
-		}
-		list->last = newShowNode;
-		list->count++;
-		// Now we have the address to the show in the list
-		showFound = &newShowNode->show;
-	}
-	// Iterating along the seasons in showFound
-	tempSeasonNode = show.seasons.first;
-	while (tempSeasonNode != NULL) {
-		seasonFound = seasonList_find(showFound->seasons, 
-									tempSeasonNode->season.number);
-		// If we don't find the season, add it.
-		if (seasonFound == NULL) {
-			error = seasonList_add(&showFound->seasons,
-									tempSeasonNode->season);
-			if (error != E_SUCCESS) {
-				return error;
-			}
-		}
-		tempEpisodeNode = tempSeasonNode->season.episodes.first;
-		while (tempEpisodeNode != NULL){
-			// if the episode is duplicated it's not added.  We should still
-			// check to see if any other episodes need to be added though.
-			error = show_addEpisode(list,
-							showFound->name, 
-							tempSeasonNode->season.number,
-							tempEpisodeNode->episode);
-			if (error != E_SUCCESS && error != E_EPISODE_DUPLICATED) {
-				return error;
-			}
-			tempEpisodeNode = tempEpisodeNode->next;
-		}
-		tempSeasonNode = tempSeasonNode->next;
-	}
+        int seasonNumber = incomingSeasonNode->season.number;
+        tSeason* existingSeason = seasonList_find(existingShow->seasons, seasonNumber);
+
+        // If season doesn't exist, add it
+        if (existingSeason == NULL) {
+            tApiError error = seasonList_add(&existingShow->seasons, incomingSeasonNode->season);
+            if (error != E_SUCCESS) return error;
+        }
+
+        // Add each episode
+        tEpisodeNode* incomingEpisodeNode = incomingSeasonNode->season.episodes.first;
+        
+        while (incomingEpisodeNode != NULL) {
+            tApiError error = show_addEpisode(list, show.name, seasonNumber, incomingEpisodeNode->episode);
+            if (error != E_SUCCESS) return error;
+            incomingEpisodeNode = incomingEpisodeNode->next;
+        }
+        
+    } else {
+        // Allocate and add new show to the list
+        tShowNode* newNode = (tShowNode*)malloc(sizeof(tShowNode));
+        if (newNode == NULL) return E_MEMORY_ERROR;
+
+        tApiError error = show_cpy(&newNode->show, &show);
+        if (error != E_SUCCESS) {
+            free(newNode);
+            newNode = NULL;
+            return error;
+        }        
+        
+        // Link into list
+        newNode->next = NULL;
+        newNode->prev = list->last;
+
+        if (list->last != NULL)
+            list->last->next = newNode;
+        else
+            list->first = newNode;
+
+        list->last = newNode;
+        list->count++;
+    }
+    
+        
     return E_SUCCESS;
 }
 
 // Add a new season at the beginning of the season list
 tApiError seasonList_add(tSeasonList* list, tSeason season) {
    /////////////////////////////////
-	// PR2_1e
+	// PR2_3a
 	/////////////////////////////////
-	tSeasonNode	*tempSeasonNode;
-	tApiError	error;
+    assert(list != NULL);
 
-	assert(list != NULL);	
-	assert(&season != NULL);
+    // Allocate new node
+    tSeasonNode* newNode = (tSeasonNode*)malloc(sizeof(tSeasonNode));
+    if (newNode == NULL) return E_MEMORY_ERROR;
+    
+     // Initialize next pointer to NULL 
+    newNode->next = NULL;
 
-	tempSeasonNode = malloc(1 * sizeof(tSeasonNode));
-	if (tempSeasonNode == NULL) {
-		return E_MEMORY_ERROR;
-	}
-	error =	season_cpy(&tempSeasonNode->season, &season);
-	tempSeasonNode->next = list->first;
-	list->first = tempSeasonNode;
-	list->count++;
+    // Deep copy the season
+    tApiError error = season_cpy(&newNode->season, &season);
+    if (error != E_SUCCESS) {
+        free(newNode);
+        newNode = NULL;
+        return error;
+    }  
+    
+    // Insert into list
+    if (list->first == NULL) {
+        list->first = newNode;
+    } else {
+        tSeasonNode* current = list->first;
+        while (current->next != NULL) {
+            current = current->next;
+        }
+        current->next = newNode;
+    }
+
+    list->count++;
     return E_SUCCESS;
 }
+
 
 tApiError episodeQueue_enqueue(tEpisodeQueue* queue, tEpisode episode) {
     /////////////////////////////////
-    // PR2_1c 
+    // PR2_2a 
     /////////////////////////////////
-	tEpisodeNode* new;
+    assert(queue != NULL);
 
-  	assert(queue != NULL); 
-  	assert(&episode != NULL); 
+    // Allocate new node
+    tEpisodeNode* newNode = (tEpisodeNode*)malloc(sizeof(tEpisodeNode));
+    if (newNode == NULL) return E_MEMORY_ERROR;
+
+    // Deep copy episode into node
+    tApiError error = episode_cpy(&newNode->episode, &episode);
+    if (error != E_SUCCESS) {
+        free(newNode);
+        newNode = NULL;
+        return error;
+    }    
    
-	new = malloc(1 * sizeof(tEpisodeNode));
-	if (new == NULL) {
-		return E_MEMORY_ERROR;
-	}	
-	if (episode_cpy(&new->episode, &episode) == E_MEMORY_ERROR) {
-		return E_MEMORY_ERROR;
-	}
-	new->next = NULL;
-	if (queue->first == NULL) {
-		queue->first = new;
-	}
-	else {
-		queue->last->next = new;
-	}
-	queue->last = new;
-	queue->count++;
+    newNode->next = NULL;
+
+    // Insert into queue
+    if (queue->last != NULL)
+        queue->last->next = newNode;
+    else
+        queue->first = newNode;
+
+    queue->last = newNode;
+    queue->count++;
+    
+   
     return E_SUCCESS;
 }
+
 
 // Copy a show from src to dst
 tApiError show_cpy(tShow* dst, const tShow* src) {
@@ -306,6 +313,7 @@ tApiError show_cpy(tShow* dst, const tShow* src) {
 
     return E_SUCCESS;
 }
+
 
 // Copy a season from src to dst
 tApiError season_cpy(tSeason* dst, const tSeason* src) {
@@ -336,6 +344,7 @@ tApiError season_cpy(tSeason* dst, const tSeason* src) {
     return E_SUCCESS;
 }
 
+
 // Copy an episode from src to dst
 tApiError episode_cpy(tEpisode* dst, const tEpisode* src) {
     // Check preconditions
@@ -345,6 +354,7 @@ tApiError episode_cpy(tEpisode* dst, const tEpisode* src) {
     // Use episode_init to perform a deep copy of the episode
     return episode_init(dst, src->number, src->title, src->duration, src->rating);
 }
+
 
 // Find a show by its name
 tShow* showList_find(tShowCatalog list, const char* name) {
@@ -371,58 +381,64 @@ tSeason* seasonList_find(tSeasonList list, int number) {
 // Add an episode to a specific season of a specific show
 tApiError show_addEpisode(tShowCatalog* shows, const char* showName, int seasonNumber, tEpisode episode) {
     /////////////////////////////////
-    // PR2_1d 
+    // PR2_2b 
     /////////////////////////////////
-   	tShow			*show;
-	tSeason			*season;
-	tEpisodeNode	*tempEpisode;
+    assert(shows != NULL);
+    assert(showName != NULL);
 
-	assert(shows != NULL);
-	assert(&episode != NULL);
+    // Find the show
+    tShow* show = showList_find(*shows, showName);
+    if (show == NULL)
+        return E_INVALID_ENTRY_FORMAT;
 
-	show = showList_find(*shows, showName);
-	assert(show != NULL);
-	season = seasonList_find(show->seasons, seasonNumber);
-	assert(season != NULL);
-	tempEpisode = season->episodes.first;
-	while (tempEpisode != NULL)
-	{
-		if (tempEpisode->episode.title != NULL && strcmp(tempEpisode->episode.title, episode.title) == 0) {
-			return E_EPISODE_DUPLICATED;
-		}
-		tempEpisode = tempEpisode->next;
-	}
-	if (episodeQueue_enqueue(&season->episodes, episode) != E_SUCCESS) {
-		return E_MEMORY_ERROR;
-	}
-	season->numEpisodes++;
+    // Find the season
+    tSeason* season = seasonList_find(show->seasons, seasonNumber);
+    if (season == NULL)
+        return E_INVALID_ENTRY_FORMAT;
+
+    // Check for existing episode with the same title
+    tEpisodeNode* current = season->episodes.first;
+    while (current != NULL) {
+        if (strcmp(current->episode.title, episode.title) == 0) {
+            return E_EPISODE_DUPLICATED;
+        }
+        current = current->next;
+    }
+
+    // If no duplicate, enqueue the episode
+    tApiError error = episodeQueue_enqueue(&(season->episodes), episode);
+       
+    if (error != E_SUCCESS)
+        return error;
+
+    season->numEpisodes++;
     return E_SUCCESS;
 }
+
 
 // Calculate total duration of a season
 tTime show_seasonTotalDuration(tShowCatalog shows, const char* showName, int seasonNumber) {
     /////////////////////////////////
 	// PR2_1g
-	/////////////////////////////////   
-    tTime			time;
-    tShow			*show;
-    tSeason			*season;
-	tEpisodeNode	*tempNode;
-    time_parse(&time,"00:00");
-	 
-	show = showList_find(shows, showName);
-	season = seasonList_find(show->seasons, seasonNumber);	
-	tempNode = season->episodes.first;
-	while (tempNode != NULL) {
-		time.hour += tempNode->episode.duration.hour; 
-		time.minutes += tempNode->episode.duration.minutes; 
-		if (time.minutes > 60) {
-			time.hour += time.minutes / 60;
-			time.minutes = time.minutes % 60;
-		}
-		tempNode = tempNode->next;
-	}
-    return time;
+	/////////////////////////////////
+    tTime total = {0, 0};
+    tShow* show = showList_find(shows, showName);
+    if (!show) return total;
+
+    tSeason* season = seasonList_find(show->seasons, seasonNumber);
+    if (!season) return total;
+
+    tEpisodeNode* node = season->episodes.first;
+    while (node) {
+        total.hour += node->episode.duration.hour;
+        total.minutes += node->episode.duration.minutes;
+
+        total.hour += total.minutes / 60;
+        total.minutes %= 60;
+
+        node = node->next;
+    }
+    return total;
 }
 
 // Calculate average rating of episodes in a season
@@ -430,28 +446,23 @@ float show_seasonAverageRating(tShowCatalog shows, const char* showName, int sea
     /////////////////////////////////
 	// Ex1 PR2 1h
 	/////////////////////////////////
-	tShow*			show;
- 	tSeason*		season;
-	tEpisodeNode*	tmpNode;
-	float			ratingAverage;
+    float totalRating = 0.0f;
+    int count = 0;
 
-	assert(&shows != NULL);
-	show = showList_find(shows, showName);	
-	if (show == NULL) {
-    	return  0.0f;
-	}
-	season = seasonList_find(show->seasons, seasonNumber);
-	if (season == NULL || season->numEpisodes == 0) {
-    	return  0.0f;
-	}
-	tmpNode = season->episodes.first;
-	ratingAverage = 0.0f;
-	while (tmpNode != NULL) {
-		ratingAverage += tmpNode->episode.rating;	
-		tmpNode = tmpNode->next;
-	}
-	ratingAverage /= (float)season->numEpisodes;	
-	return ratingAverage;
+    tShow* show = showList_find(shows, showName);
+    if (!show) return 0.0f;
+
+    tSeason* season = seasonList_find(show->seasons, seasonNumber);
+    if (!season) return 0.0f;
+
+    tEpisodeNode* node = season->episodes.first;
+    while (node) {
+        totalRating += node->episode.rating;
+        count++;
+        node = node->next;
+    }
+
+    return count > 0 ? totalRating / count : 0.0f;
 }
 
 // Return the number of total shows
@@ -459,32 +470,31 @@ int showsList_len(tShowCatalog shows) {
 	/////////////////////////////////
 	// PR2_1j
 	/////////////////////////////////
-	assert(&shows != NULL);
-
 	return shows.count;
 	/////////////////////////////////
+    // return -1;
 }
 
 // Free the memory allocated for show list
 tApiError showList_free(tShowCatalog* list) {
 	/////////////////////////////////
-	// PR2_1i
-	/////////////////////////////////       
-	tShowNode* temp;
-	tShowNode* current;
-  	assert (list != NULL); 
+	// PR2_4a
+	/////////////////////////////////   
     
-	current = list->first;
-	while (current != NULL)
-	{
-		show_free(&current->show);
-		temp = current;
-		current = current->next;
-		free(temp);
-	}
-
-	list->first = NULL;
-	list->count = 0;
+    tShowNode* current = list->first;
+    while (current) {        
+        show_free(&current->show);
+            
+        tShowNode* temp = current;
+        current = current->next;
+        free(temp);
+        temp = NULL;
+    }
+    
+    list->first = list->last = NULL;
+    list->count = 0;
+    
+    
     return E_SUCCESS;
 }
 
@@ -516,6 +526,7 @@ tApiError seasonList_free(tSeasonList* list) {
         current = current->next;
         free(temp);       
     }
+    
 
     list->first = NULL;
     list->count = 0;
