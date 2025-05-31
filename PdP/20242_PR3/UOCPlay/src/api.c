@@ -1,3 +1,10 @@
+/*
+ * File: api.c
+ * Author: Ivan Miranda Moral
+ * Date: 30-05-2025
+ * Description:  api.c file for exercises for PR3
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -371,10 +378,21 @@ tApiError api_addDataEntry(tApiData* data, tCSVEntry entry) {
     /////////////////////////////////
     else if (strcmp(csv_getType(&entry), "WATCHLIST") == 0){
         // Add a film to the films catalog
-		tempEntry = *entry;
-		tempEntry.numFields -= 1;
-		watchListID = csv_getAsInteger(&tempEntry, entry.numFields);
-        error = api_addToWatchlist(data, watchListID, &tempEntry);   
+		csv_initEntry(&tempEntry);
+		tempEntry.numFields = entry.numFields - 1;
+		tempEntry.type = strdup("FILM");
+		tempEntry.fields = malloc(tempEntry.numFields * sizeof(char *));
+		for (int i = 0; i < tempEntry.numFields; i++) {
+			if (entry.fields[i] != NULL) {
+				tempEntry.fields[i] = strdup(entry.fields[i]);
+			}
+			else {
+				tempEntry.fields[i] = NULL;
+			}
+		}
+		watchListID = csv_getAsInteger(entry, entry.numFields - 1);
+        error = api_addToWatchlist(data, watchListID, tempEntry);   
+		csv_freeEntry(&tempEntry);
     } 
 
     return error;
@@ -504,6 +522,9 @@ tApiError api_getLongestFilm(tApiData data, tCSVEntry *entry) {
     /////////////////////////////////
     // PR3_4b
     /////////////////////////////////
+	if (data.films.filmList.first == NULL) {
+		return E_SUCCESS;
+	}
 	tFilm* longest = filmList_longestFind(data.films.filmList);    
 	if (longest == NULL) {
 		return E_FILM_NOT_FOUND;
@@ -517,6 +538,9 @@ tApiError api_getLongestFreeFilm(tApiData data, tCSVEntry *entry) {
     /////////////////////////////////
     // PR3_4c
     /////////////////////////////////
+	if (data.films.freeFilmList.first == NULL) {
+		return E_SUCCESS;
+	}
 	tFilm* longest = freeFilmList_longestFind(data.films.freeFilmList);    
 	if (longest == NULL) {
 		return E_FILM_NOT_FOUND;
@@ -529,7 +553,7 @@ tApiError api_sortCatalogByYear(tApiData *data) {
     /////////////////////////////////
     // PR3_4d
     /////////////////////////////////
-   	return filmCatalog_SortByYear(data.films); 
+   	return filmCatalog_SortByYear(&data->films); 
 }
 
 // Get longest film
@@ -537,6 +561,16 @@ tApiError api_getOldestFilm(tApiData data, tCSVEntry *entry, bool free) {
     /////////////////////////////////
     // PR3_4e
     /////////////////////////////////
+	if (free) {
+		if (data.films.filmList.first == NULL) {
+			return E_SUCCESS;
+		}
+	}
+	else {
+		if (data.films.freeFilmList.first == NULL) {
+			return E_SUCCESS;
+		}
+	}
 	tFilm* oldest = filmCatalog_OldestFind(data.films, free);
 	if (oldest == NULL) {
 		return E_FILM_NOT_FOUND;
@@ -549,7 +583,7 @@ tApiError api_sortCatalogByRating(tApiData *data) {
     /////////////////////////////////
     // PR3_4f
     /////////////////////////////////
-    return filmCatalog_SortByRating(data->films);
+    return filmCatalog_SortByRating(&data->films);
 }
 
 // updateVipLevel of each person
@@ -602,7 +636,7 @@ tApiError api_getSubscriptionsByDocument(tApiData data, char *name, tCSVData *cs
 	}
 
 	for (int i = 0; i < subsByDoc->count; i++) {
-		api_getSubscription(data, subsByDoc->elems[i], csvData->entries[csvData->count]);
+		api_getSubscription(data, subsByDoc->elems[i].id, &csvData->entries[csvData->count]);
 		csvData->count++;
 	}
 	subscriptions_free(subsByDoc);

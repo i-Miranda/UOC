@@ -1,3 +1,10 @@
+/*
+ * File: date.c
+ * Author: Ivan Miranda Moral
+ * Date: 30-05-2025
+ * Description:  date.c file for exercises for PR3
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>

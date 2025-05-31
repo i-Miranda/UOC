@@ -1,3 +1,10 @@
+/*
+ * File: show.h
+ * Author: Ivan Miranda Moral
+ * Date: 30-05-2025
+ * Description: Header file for exercises for PR3
+ */
+
 #ifndef __SHOW_H__
 #define __SHOW_H__
 

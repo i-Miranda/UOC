@@ -1,3 +1,10 @@
+/*
+ * File: person.c
+ * Author: Ivan Miranda Moral
+ * Date: 30-05-2025
+ * Description:  person.c file for exercises for PR3
+ */
+
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
@@ -313,31 +320,42 @@ int people_findByEmail(tPeople data, const char* email) {
 	assert(&data != NULL);
 	assert(email != NULL);
 	
+	int foundIndex = -1;
+	int count = 0;
+
 	for (int i = 0; i < data.count; i++) {
 		if (strcmp(data.elems[i].email, email) == 0) {
-			return i;
+			count++;
+			if (count == 1) {
+				foundIndex = i;
+			}
+			else {
+				return -1;
+			}
 		}
 	}
 
-    return -1;
+    return foundIndex;
 }
 
 /*---------AUXILIARY FUNCTIONS---------*/
 
 void quickSort_ByVipLevel(tPerson* persons, int begin, int end) {
 	int i, j;
-	int pivot;
+	tPerson* pivot;
 
     if (begin < end) {
 		i = begin + 1;
 		j = end;
-		pivot = persons[begin].vipLevel;
+		pivot = &persons[begin];
 
 		while (i <= j) {
-			while (i <= end && persons[i].vipLevel >= pivot) {
+			while (i <= end && (persons[i].vipLevel > pivot->vipLevel ||
+				(persons[i].vipLevel == pivot->vipLevel && strcmp(persons[i].document, (*pivot).document) < 0))) {
 				i++;
 			}
-			while (persons[j].vipLevel < pivot) {
+			while (j >= begin && persons[j].vipLevel < pivot->vipLevel ||
+				(persons[j].vipLevel == pivot->vipLevel && strcmp(persons[j].document, (*pivot).document) > 0)) {
 				j--;
 			}
 			if (i < j) {
@@ -345,25 +363,27 @@ void quickSort_ByVipLevel(tPerson* persons, int begin, int end) {
 			}
 		}
 		swapPersons(&persons[begin], &persons[j]);
-		quickSort(persons, begin, j - 1);
-		quickSort(persons, j + 1, end);
+		quickSort_ByVipLevel(persons, begin, j - 1);
+		quickSort_ByVipLevel(persons, j + 1, end);
 	}
 }
 
 void quickSort_ByDocument(tPerson* persons, int begin, int end) {
 	int i, j;
-	char* pivot;
+	tPerson* pivot;
 
     if (begin < end) {
 		i = begin + 1;
 		j = end;
-		pivot = persons[begin].document;
+		pivot = &persons[begin];
 
 		while (i <= j) {
-			while (i <= end && strcmp(persons[i].document, pivot) < 0) {
+			while (i <= end && strcmp(persons[i].document, pivot->document) < 0 ||
+				(strcmp(persons[i].document, pivot->document) == 0 && name_cmp(&persons[i], pivot) < 0)) {
 				i++;
 			}
-			while (strcmp(persons[j].document, pivot) > 0) {
+			while (j >= begin && strcmp(persons[j].document, pivot->document) > 0 ||
+				(strcmp(persons[j].document, pivot->document) == 0 && name_cmp(&persons[j], pivot) > 0)) {
 				j--;
 			}
 			if (i < j) {
@@ -371,41 +391,22 @@ void quickSort_ByDocument(tPerson* persons, int begin, int end) {
 			}
 		}
 		swapPersons(&persons[begin], &persons[j]);
-		quickSort(persons, begin, j - 1);
-		quickSort(persons, j + 1, end);
+		quickSort_ByDocument(persons, begin, j - 1);
+		quickSort_ByDocument(persons, j + 1, end);
 	}
 }
 
+int name_cmp(tPerson* a, tPerson* b) {
+	int surname_cmp = strcmp(a->surname, b->surname);
+
+	if (surname_cmp != 0) {
+		return surname_cmp;
+	}
+	return strcmp(a->name, b->name);
+}
+
 void swapPersons(tPerson* a, tPerson* b) {
-	tPerson temp;
-
-	temp.document = a->document;
-	temp.name = a->name;
-	temp.surname = a->surname;
-	temp.phone = a->phone;
-	temp.email = a->email;
-	temp.address = a->address;
-	temp.cp = a->cp;
-	date_cpy(&temp.birthday, *a->birthday);
-	temp.vipLevel = a->vipLevel;
-
-	a->document = b->document;
-	a->name = b->name;
-	a->surname = b->surname;
-	a->phone = b->phone;
-	a->email = b->email;
-	a->address = b->address;
-	a->cp = b->cp;
-	date_cpy(a->birthday, *b->birthday);
-	a->vipLevel = b->vipLevel;
-
-	b->document = temp.document;
-	b->name = temp.name;
-	b->surname = temp.surname;
-	b->phone = temp.phone;
-	b->email = temp.email;
-	b->address = temp.address;
-	b->cp = temp.cp;
-	date_cpy(b->birthday, temp.birthday);
-	b->vipLevel = temp.vipLevel;
+	tPerson temp = *a;
+	*a = *b;
+	*b = temp;
 }

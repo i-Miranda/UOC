@@ -1,3 +1,10 @@
+/*
+ * File: subscription.h
+ * Author: Ivan Miranda Moral
+ * Date: 30-05-2025
+ * Description: Header file for exercises for PR3
+ */
+
 #ifndef __SUBSCRIPTION_H__
 #define __SUBSCRIPTION_H__
 #include "csv.h"
@@ -8,6 +15,7 @@
 
 #define MAX_DOCUMENT 9
 #define MAX_PLAN 250
+#define MAX_FILMS 1000
 
 #define NUM_FIELDS_SUBSCRIPTION 7
 
@@ -84,4 +92,7 @@ tSubscription* subscriptions_findHash(tSubscriptions data, int id);
 
 ////////////////////////////////////////////
 
+/*---------AUXILIARY FUNCTIONS---------*/
+
+int	monthsBetween(tDate start, tDate end);
 #endif

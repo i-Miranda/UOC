@@ -1,3 +1,10 @@
+/*
+ * File: film.c
+ * Author: Ivan Miranda Moral
+ * Date: 30-05-2025
+ * Description:  film.c file for exercises for PR3
+ */
+
 #include "film.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -243,11 +250,10 @@ tFilm* filmList_longestFind(tFilmList list) {
 
 	tFilm* longestFilm = &tempNode->elem;
 	while (tempNode != NULL) {
-		if (tempNode->elem.duration > longestFilm->duration || 
-			(tempNode->elem.duration == longestFilm->duration && 
+		if (time_cmp(tempNode->elem.duration, longestFilm->duration) > 0 || 
+			(time_cmp(tempNode->elem.duration, longestFilm->duration) == 0 && 
 			strcmp(tempNode->elem.name, longestFilm->name) < 0)) {
 				longestFilm = &tempNode->elem;
-			}
 		}
 		tempNode = tempNode->next;	
 	}
@@ -266,14 +272,13 @@ tFilm* freeFilmList_longestFind(tFreeFilmList list) {
 		return NULL;
 	}
 
-	tFilm* longestFilm = &tempNode->elem;
+	tFilm* longestFilm = tempNode->elem;
 	while (tempNode != NULL) {
-		if (tempNode->elem.duration > longestFilm->duration || 
-			(tempNode->elem.duration == longestFilm->duration && 
-			strcmp(tempNode->elem.name, longestFilm->name) < 0)) {
-				longestFilm = &tempNode->elem;
+		if (time_cmp(tempNode->elem->duration, longestFilm->duration) > 0 || 
+			(time_cmp(tempNode->elem->duration, longestFilm->duration) == 0 && 
+			strcmp(tempNode->elem->name, longestFilm->name) < 0)) {
+				longestFilm = tempNode->elem;
 			}
-		}
 		tempNode = tempNode->next;	
 	}
     return longestFilm;
@@ -285,12 +290,13 @@ tApiError filmList_SortByYear_Bubble(tFilmList* list) {
     // PR3_1c
     /////////////////////////////////
 	assert(list != NULL);
-	if (list->first == NULL) {
+	if (list->first == NULL || list->first->next == NULL) {
 		return E_SUCCESS;
 	}
 
 	bool swapped = true;
 	bool shouldSwap;
+   	tFilmListNode** firstNode;
    	tFilmListNode* currentNode;
    	tFilmListNode* nextNode;
 	tFilm* currentFilm;
@@ -298,19 +304,30 @@ tApiError filmList_SortByYear_Bubble(tFilmList* list) {
 
 	while (swapped){
 		swapped = false;
-		currentNode = list->first; 
-		while (currentNode != NULL && currentNode->next != NULL) {
+		firstNode = &list->first;
+		while (*firstNode != NULL && (*firstNode)->next != NULL) {
+			currentNode = *firstNode; 
 			nextNode = currentNode->next;
 			currentFilm = &currentNode->elem;
 			nextFilm = &nextNode->elem;
-			shouldSwap = isNewer(currentFilm, nextFilm);
+			shouldSwap = checkNewer(currentFilm, nextFilm);
 			if (shouldSwap) {
-				swapFilms(currentFilm, nextFilm);
+				currentNode->next = nextNode->next;
+				nextNode->next = currentNode;
+				*firstNode = nextNode;
 				swapped = true;
 			}
-			currentNode = nextNode;
+			firstNode = &(*firstNode)->next;
 		}
 	}
+	
+	//update last node
+	currentNode = list->first;
+	while (currentNode->next != NULL) {
+		currentNode = currentNode->next;
+	}
+	list->last = currentNode;
+
     return E_SUCCESS;
 }
 
@@ -323,7 +340,6 @@ tApiError freeFilmList_SortByYear_Bubble(tFreeFilmList* list) {
 	if (list->first == NULL) {
 		return E_SUCCESS;
 	}
-
 	bool swapped = true;
 	bool shouldSwap;
    	tFreeFilmListNode* currentNode;
@@ -336,16 +352,26 @@ tApiError freeFilmList_SortByYear_Bubble(tFreeFilmList* list) {
 		currentNode = list->first; 
 		while (currentNode != NULL && currentNode->next != NULL) {
 			nextNode = currentNode->next;
-			currentFilm = &currentNode->elem;
-			nextFilm = &nextNode->elem;
-			shouldSwap = isNewer(currentFilm, nextFilm);
+			currentFilm = currentNode->elem;
+			nextFilm = nextNode->elem;
+			shouldSwap = checkNewer(currentFilm, nextFilm);
 			if (shouldSwap) {
-				swapFilms(currentFilm, nextFilm);
+				tFilm* temp = currentNode->elem;
+				currentNode->elem = nextNode->elem;
+				nextNode->elem = temp;
 				swapped = true;
 			}
 			currentNode = nextNode;
 		}
 	}
+
+	//update last node
+	currentNode = list->first;
+	while (currentNode->next != NULL) {
+		currentNode = currentNode->next;
+	}
+	list->last = currentNode;
+
     return E_SUCCESS;
 }
 
@@ -356,8 +382,9 @@ tApiError filmCatalog_SortByYear(tFilmCatalog* catalog) {
     /////////////////////////////////
 	assert(catalog != NULL);
 
-	filmList_SortByYear_Bubble(catalog->filmList);    
-	freeFilmList_SortByYear_Bubble(catalog->freeFilmList);
+	filmList_SortByYear_Bubble(&catalog->filmList);    
+	freeFilmList_SortByYear_Bubble(&catalog->freeFilmList);
+	catalog->sortedByDate = true;
     return E_SUCCESS;
 }
 
@@ -369,10 +396,10 @@ tFilm* filmCatalog_OldestFind (tFilmCatalog catalog, bool free) {
 	assert(&catalog != NULL);
 
 	if (free) {
-		return freeFilmList_oldestFind(&catalog->freeFilmList);
+		return freeFilmList_oldestFind(&catalog.freeFilmList);
 	}
 	else {
-		return filmList_oldestFind(&catalog->filmList);
+		return filmList_oldestFind(&catalog.filmList);
 	}
 }
 
@@ -381,10 +408,11 @@ tApiError filmCatalog_SortByRating(tFilmCatalog* catalog) {
     /////////////////////////////////
     // PR3_1g
     /////////////////////////////////
-	assert(list != NULL);
+	assert(catalog != NULL);
 
 	filmList_selectionSortByRating(&catalog->filmList);
 	freeFilmList_selectionSortByRating(&catalog->freeFilmList);
+	catalog->sortedByDate = false;
     return E_SUCCESS;
 }
 
@@ -574,7 +602,7 @@ tApiError film_catalog_add(tFilmCatalog* catalog, tFilm film) {
     /////////////////////////////////
     // PR3_1e
     /////////////////////////////////
-    
+   	catalog->sortedByDate = false; 
     return error;
     /////////////////////////////////
     // return E_NOT_IMPLEMENTED;
@@ -636,44 +664,20 @@ tApiError film_catalog_free(tFilmCatalog* catalog) {
 
 /*---------AUXILIARY FUNCTIONS---------*/
 
-bool isNewer(tFilm* currentFilm, tFilm* nextFilm) {
+bool checkNewer(tFilm* currentFilm, tFilm* nextFilm) {
 	bool isNewer = false;
-	int	date_cmp = date_cmp(currentFilm->release, nextFilm->release);
-	if (date_cmp > 0) {
+	int	result = date_cmp(currentFilm->release, nextFilm->release);
+	if (result > 0) {
 		isNewer = true;
 	}
 	else {
-		if (date_cmp == 0) {
-			if (strcmp(currentFilm->name, nextFilm->name) < 0) {
+		if (result == 0) {
+			if (strcmp(currentFilm->name, nextFilm->name) > 0) {
 				isNewer = true;
+			}
 		}
 	}
 	return isNewer;	
-}
-
-void swapFilms(tFilm* currentFilm, tFilm* nextFilm) {
-	tFilm tempFilm;
-
-	tempFilm.name = currentFilm->name;
-	time_cpy(&tempFilm.duration, *currentFilm->duration);
-	tempFilm.genre = currentFilm->genre;
-	date_cpy(&tempFilm.release, *currentFilm->release);
-	tempFilm.rating = currentFilm->rating;
-	tempFilm.isFree = currentFilm->isFree;
-
-	currentFilm->name = nextFilm->name;
-	time_cpy(currentFilm->duration, *nextFilm->duration);
-	currentFilm->genre = nextFilm->genre;
-	date_cpy(currentFilm->release, *nextFilm->release);
-	currentFilm->rating = nextFilm->rating;
-	currentFilm->isFree = nextFilm->isFree;
-
-	nextFilm->name = tempFilm.name;
-	time_cpy(nextFilm->duration, tempFilm.duration);
-	nextFilm->genre = tempFilm.genre;
-	date_cpy(nextFilm->release, tempFilm.release);
-	nextFilm->rating = tempFilm.rating;
-	nextFilm->isFree = tempFilm.isFree;
 }
 
 tFilm* filmList_oldestFind(tFilmList *list) {
@@ -687,7 +691,7 @@ tFilm* filmList_oldestFind(tFilmList *list) {
 
 	tempNode = tempNode->next;
 	while (tempNode != NULL) {
-		if (isNewer(oldest, &tempNode->elem)) {
+		if (checkNewer(oldest, &tempNode->elem) == true) {
 			oldest = &tempNode->elem;
 		}
 		tempNode = tempNode->next;
@@ -702,12 +706,12 @@ tFilm* freeFilmList_oldestFind(tFreeFilmList *list) {
 	}
 
 	tFreeFilmListNode* tempNode = list->first;
-	tFilm* oldest = &tempNode->elem;
+	tFilm* oldest = tempNode->elem;
 
 	tempNode = tempNode->next;
 	while (tempNode != NULL) {
-		if (isNewer(oldest, &tempNode->elem)) {
-			oldest = &tempNode->elem;
+		if (checkNewer(oldest, tempNode->elem)) {
+			oldest = tempNode->elem;
 		}
 		tempNode = tempNode->next;
 	}
@@ -717,37 +721,74 @@ tFilm* freeFilmList_oldestFind(tFreeFilmList *list) {
 void filmList_selectionSortByRating(tFilmList* filmList) {
 	assert(filmList != NULL);
 
-	for (tFilmListNode* i = filmList->first; i != NULL; i = i->next) {
-		tFilmListNode* maxNode = i;
-		for (tFilmListNode* j = i->next; j != NULL; j = j->next) {
-			if (j->elem.rating > maxNode->elem.rating) {
+	if (filmList->first == NULL) {
+		return;
+	}
+
+	for (tFilmListNode** i = &filmList->first; *i != NULL; i = &(*i)->next) {
+		tFilmListNode** maxNode = i;
+		for (tFilmListNode** j = &(*i)->next; *j != NULL; j = &(*j)->next) {
+			if ((*j)->elem.rating > (*maxNode)->elem.rating) {
 				maxNode = j;
-			} else if (j->elem.rating == maxNode->elem.rating &&
-				strcmp(j->elem.name, maxNode->elem.name) < 0) {
+			} else if ((*j)->elem.rating == (*maxNode)->elem.rating &&
+				strcmp((*j)->elem.name, (*maxNode)->elem.name) < 0) {
 				maxNode = j;
 			}
 		}
 		if (maxNode != i) {
-			swapFilms(i->elem, maxNode->elem);
+			tFilmListNode* temp = *i;
+		
+			*i = *maxNode;
+			*maxNode = temp;
+			
+			tFilmListNode* tempNext = (*i)->next;
+			(*i)->next = (*maxNode)->next;
+			(*maxNode)->next = tempNext;
 		}
 	}
+	
+	//Update the last
+	tFilmListNode* last = filmList->first;
+	while (last->next != NULL) {
+		last = last->next;
+	}
+	
+	filmList->last = last;
 }
 
 void freeFilmList_selectionSortByRating(tFreeFilmList* freeFilmList) {
 	assert(freeFilmList != NULL);
 
-	for (tFreeFilmListNode* i = freeFilmList->first; i != NULL; i = i->next) {
-		tFreeFilmListNode* maxNode = i;
-		for (tFreeFilmListNode* j = i->next; j != NULL; j = j->next) {
-			if (j->elem.rating > maxNode->elem.rating) {
+	if (freeFilmList->first == NULL) {
+		return;
+	}
+
+	for (tFreeFilmListNode** i = &freeFilmList->first; *i != NULL; i = &(*i)->next) {
+		tFreeFilmListNode** maxNode = i;
+		for (tFreeFilmListNode** j = &(*i)->next; *j != NULL; j = &(*j)->next) {
+			if ((*j)->elem->rating > (*maxNode)->elem->rating) {
 				maxNode = j;
-			} else if (j->elem.rating == maxNode->elem.rating &&
-				strcmp(j->elem.name, maxNode->elem.name) < 0) {
+			} else if ((*j)->elem->rating == (*maxNode)->elem->rating &&
+				strcmp((*j)->elem->name, (*maxNode)->elem->name) < 0) {
 				maxNode = j;
 			}
 		}
 		if (maxNode != i) {
-			swapFilms(i->elem, maxNode->elem);
+			tFreeFilmListNode* temp = *i;
+		
+			*i = *maxNode;
+			*maxNode = temp;
+			
+			tFreeFilmListNode* tempNext = (*i)->next;
+			(*i)->next = (*maxNode)->next;
+			(*maxNode)->next = tempNext;
 		}
 	}
+	//Update the last
+	tFreeFilmListNode* last = freeFilmList->first;
+	while (last->next != NULL) {
+		last = last->next;
+	}
+	
+	freeFilmList->last = last;
 }

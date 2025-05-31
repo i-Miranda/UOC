@@ -1,3 +1,10 @@
+/*
+ * File: film.h
+ * Author: Ivan Miranda Moral
+ * Date: 30-05-2025
+ * Description: Header file for exercises for PR3
+ */
+
 #ifndef __FILM_H__
 #define __FILM_H__
 #include <stdbool.h>
@@ -154,8 +161,7 @@ tApiError film_catalog_free(tFilmCatalog* catalog);
 
 /*---------AUXILIARY FUNCTIONS---------*/
 
-bool isNewer(tFilm* currentFilm, tFilm* nextFilm);
-void swapFilms(tFilm* currentFilm, tFilm* nextFilm);
+bool checkNewer(tFilm* currentFilm, tFilm* nextFilm);
 tFilm* filmList_oldestFind(tFilmList *list);
 tFilm* freeFilmList_oldestFind(tFreeFilmList *list);
 void filmList_selectionSortByRating(tFilmList* filmList);

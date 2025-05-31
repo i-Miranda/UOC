@@ -1,3 +1,10 @@
+/*
+ * File: subscription.c
+ * Author: Ivan Miranda Moral
+ * Date: 30-05-2025
+ * Description: subscription.c file for exercises for PR3
+ */
+
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
@@ -145,7 +152,7 @@ tApiError subscriptions_add(tSubscriptions* data, tPeople people, tSubscription 
     /////////////////////////////////
     // PR3_3f
     /////////////////////////////////
-	data->elems[data->count].id = data->count; 
+	data->elems[data->count].id = data->count + 1; 
 
     /////////////////////////////////
     // Increase the number of elements
@@ -168,8 +175,6 @@ tApiError subscriptions_del(tSubscriptions* data, int id) {
     
     // Shift elements to remove selected
     for(i = idx; i < data->count-1; i++) {
-            //free watchlist
-            filmstack_free(&data->elems[i].watchlist);
             // Copy element on position i+1 to position i
             subscription_cpy(&(data->elems[i]), data->elems[i+1]);
             
@@ -178,11 +183,14 @@ tApiError subscriptions_del(tSubscriptions* data, int id) {
             /////////////////////////////////
 			data->elems[i].id = i + 1;
     }
+	//free watchlist
+    filmstack_free(&data->elems[data->count - 1].watchlist);
+
     // Update the number of elements
     data->count--;  
 
     if (data->count > 0) {
-        filmstack_free(&data->elems[data->count].watchlist);
+        //filmstack_free(&data->elems[data->count].watchlist);
         data->elems = (tSubscription*) realloc(data->elems, data->count * sizeof(tSubscription));
         assert(data->elems != NULL);
     } else {
@@ -246,19 +254,24 @@ int calculate_vipLevel(tSubscriptions* data, char* document) {
     // PR3_2c
     /////////////////////////////////
     int	vipLevel; 
+	int months;
 	float totalSubCost = 0.0f;
 	tSubscriptions* clientSubs;
 	
 	assert(data != NULL);
 	assert(document != NULL);
 
-	clientSubs = subscriptions_findByDocument(data, document);
-	if (clientsubs == NULL) {
+	clientSubs = subscriptions_findByDocument(*data, document);
+	if (clientSubs == NULL || clientSubs->count == 0) {
+		if (clientSubs != NULL) {
+			subscriptions_free(clientSubs);
+		}
 		return 0;
 	}
 
 	for (int i = 0; i < clientSubs->count; i++) {
-		totalSubCost += clientSubs->elems[i].price;
+		months = monthsBetween(clientSubs->elems[i].start_date, clientSubs->elems[i].end_date);
+		totalSubCost += clientSubs->elems[i].price * (float)months;
 	}
 	vipLevel = (int)(totalSubCost / 500.00f);
 
@@ -275,9 +288,9 @@ tApiError update_vipLevel(tSubscriptions *data, tPeople* people) {
 	assert(people != NULL);
 
 	for (int i = 0; i < people->count; i++) {
-		people->elems[i].vipLevel = calculate_vipLevel(data, tempPerson->document); 	
+		people->elems[i].vipLevel = calculate_vipLevel(data, people->elems[i].document); 	
 	}
-    return E_SUCCESS
+    return E_SUCCESS;
 }
 
 // Return a pointer to the longest film of the list
@@ -285,8 +298,6 @@ char* popularFilm_find(tSubscriptions data) {
     /////////////////////////////////
     // PR3_3a
     /////////////////////////////////
-#define MAX_FILMS 1000
-
 	if (data.count == 0) return NULL;
 
 	tFilm* films[MAX_FILMS];
@@ -294,25 +305,28 @@ char* popularFilm_find(tSubscriptions data) {
 	int filmCount = 0;
 
 	for (int i = 0; i < data.count; i++) {
-		tFilmStack* stack = &data.elems[i].filmStack;
-		for (int j = 0; j < stack->count; j++) {
-			tFilm* current = &stack->elems[j];
+		tFilmstack* stack = &data.elems[i].watchlist;
+		tFilmstackNode* node = stack->top;
+
+		while (node != NULL) {
+			tFilm* current = &node->elem;
 
 			// Check if we've already seen this film (by name)
 			int found = -1;
 			for (int k = 0; k < filmCount; k++) {
-				if (strcmp(films[k]->name, current->name) == 0) {
+				if (film_equals(*films[k], *current) == true) {
 					found = k;
 					break;
 				}
 			}
 			if (found != -1) { 
 				counts[found]++; 
-			} else if (filmCount < MAX_FILMS) { 
+			} else { 
 				films[filmCount] = current;
 				counts[filmCount] = 1;
 				filmCount++;
 			}
+			node = node->next;
 		} 
 	}
 
@@ -325,16 +339,16 @@ char* popularFilm_find(tSubscriptions data) {
 	int maxCount = counts[0];
 
 	for (int i = 1; i < filmCount; i++) {
-		if (counts[i] > maxCount) {
+		if (counts[i] > maxCount) { 
 			mostPopular = films[i];
 			maxCount = counts[i];
 		} else if (counts[i] == maxCount) {
-			if (date_cmp(films[i]->release, mostPopular->release) > 0) {
+			int cmp = date_cmp(films[i]->release, mostPopular->release);
+			if (cmp > 0 || (cmp == 0 && strcmp(films[i]->name, mostPopular->name) < 0)) {
 				mostPopular = films[i];
 			}
 		}
 	}
-
 	return mostPopular->name;
 }
 
@@ -352,19 +366,19 @@ tSubscriptions* subscriptions_findByDocument(tSubscriptions data, char* document
 	
 	subsByDoc = malloc(sizeof(tSubscriptions));
 	subsByDoc->count = 0;
+	subsByDoc->elems = NULL;
 	if (subsByDoc == NULL) {
 		return NULL;
 	}
 	j = 0;
 	while (j < data.count) {
-		if (strcmp(tempSub->document, document) == 0) {
+		if (strcmp(data.elems[j].document, document) == 0) {
 			subsByDoc->count++;
 		}
 		j++;
 	}
 	if (subsByDoc->count == 0) {
-		subscriptions_free(subsByDoc);
-		return NULL;
+		return subsByDoc;
 	}
 	subsByDoc->elems = malloc(subsByDoc->count * sizeof(tSubscription));
 	if (subsByDoc->elems == NULL) {
@@ -375,7 +389,7 @@ tSubscriptions* subscriptions_findByDocument(tSubscriptions data, char* document
 	j = 0;
 	while (j < data.count) {
 		if (strcmp(data.elems[j].document, document) == 0) {
-			subscription_cpy(subsByDoc->elems[i], data.elems[j]);
+			subscription_cpy(&subsByDoc->elems[i], data.elems[j]);
 			/////////////////////////////////
 			// PR3_3d
 			/////////////////////////////////
@@ -427,4 +441,10 @@ bool subscription_equal(tSubscription subscription1, tSubscription subscription2
         return false;
     
     return true;
+}
+
+/*---------AUXILIARY FUNCTIONS---------*/
+
+int	monthsBetween(tDate start, tDate end) {
+	return (end.year - start.year) * 12 + (end.month - start.month) + 1;
 }

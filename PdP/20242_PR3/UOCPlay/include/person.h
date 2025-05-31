@@ -1,3 +1,10 @@
+/*
+ * File: person.h
+ * Author: Ivan Miranda Moral
+ * Date: 30-05-2025
+ * Description: Header file for exercises for PR3
+ */
+
 #ifndef __PERSON_H__
 #define __PERSON_H__
 #include "csv.h"
@@ -73,5 +80,6 @@ tApiError people_free(tPeople* data);
 
 void quickSort_ByVipLevel(tPerson* persons, int begin, int end); 
 void quickSort_ByDocument(tPerson* persons, int begin, int end); 
+int	name_cmp(tPerson* a, tPerson* b); 
 void swapPersons(tPerson* a, tPerson* b);
 #endif

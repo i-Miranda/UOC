@@ -1,3 +1,10 @@
+/*
+ * File: watchstack.c
+ * Author: Ivan Miranda Moral
+ * Date: 30-05-2025
+ * Description: watchstack.c file for exercises for PR3
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -84,7 +91,9 @@ tApiError filmstack_pop(tFilmstack* stack) {
 
     tFilmstackNode* temp = stack->top;
     stack->top = stack->top->next;
-    film_free(&temp->elem);
+	if (&temp->elem != NULL) {
+		film_free(&temp->elem);
+	}
     free(temp);
     stack->count--;
 

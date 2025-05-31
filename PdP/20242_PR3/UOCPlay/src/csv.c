@@ -1,3 +1,10 @@
+/*
+ * File: csv.c
+ * Author: Ivan Miranda Moral
+ * Date: 30-05-2025
+ * Description:  csv.c file for exercises for PR3
+ */
+
 #include "csv.h"
 #include <stdlib.h>
 #include <stdio.h>
