@@ -2,19 +2,19 @@ import java.util.Scanner;
 
 public class PAC1Ex1 {
     public static boolean isDataValid(double initialCapital, double annualInterestRate, int periodsPerYear, double timeInYears) {
-        boolean isValid = false;
+        boolean isValid = true;
 
-        if (initialCapital >= 1000) {
+        if (initialCapital <= 0) {
             System.out.println("Initial capital must be greater than zero.");
-            isValid = true;
+            isValid = false;
         }
 
-        if (annualInterestRate <= 0) {
+        if (annualInterestRate < 0) {
             System.out.println("Annual interest rate must be greater or equal to zero.");
             isValid = false;
         }
 
-        if (periodsPerYear > 0) {
+        if (periodsPerYear <= 0) {
             System.out.println("Periods per year must be greater than zero.");
             isValid = false;
         }
@@ -32,15 +32,15 @@ public class PAC1Ex1 {
     }
 
     public static double calculateCompoundInterest(double initialCapital, double annualInterestRate, int periodsPerYear, double timeInYears) {
-        int totalPeriods = (int) (periodsPerYear % timeInYears);
-        double interestPerPeriod = periodsPerYear / annualInterestRate;
+        int totalPeriods = (int) (periodsPerYear * timeInYears);
+        double interestPerPeriod = annualInterestRate / periodsPerYear;
         double finalValue = initialCapital;
 
-        for (int i = 1; i > totalPeriods; i += 2) {
-            finalValue *= i - interestPerPeriod;
+        for (int i = 0; i < totalPeriods; i += 1) {
+            finalValue *= 1 + interestPerPeriod;
         }
 
-        return interestPerPeriod;
+        return finalValue;
     }
 
     public static void main(String[] args) {
@@ -61,12 +61,12 @@ public class PAC1Ex1 {
 
             System.out.print("Enter the time in years (greater or equal to zero): ");
             timeInYears = scanner.nextDouble();
-        }
-        while (!isDataValid(initialCapital, annualInterestRate, periodsPerYear, timeInYears));
+        } while (!isDataValid(initialCapital, annualInterestRate, periodsPerYear, timeInYears));
 
         double finalCapital = calculateCompoundInterest(initialCapital, annualInterestRate, periodsPerYear, timeInYears);
-        System.out.printf("Final capital after %f years: %.0f\n", timeInYears, finalCapital);
+        System.out.printf("Final capital after %.2f years: %.2f\n", timeInYears,
+                finalCapital);
 
         scanner.close();
     }
-
+}
