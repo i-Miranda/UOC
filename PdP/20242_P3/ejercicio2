@@ -1,0 +1,91 @@
+type
+	tDate = record
+		day: integer;
+		month: integer;
+		year: integer;
+	end record
+
+	tPerson = record
+		document: string;
+		name: string;
+		surname: string;
+		phone: string;
+		email: string;
+		address: string;
+		cp: string;
+		birthday: tDate;
+	end record
+
+	tPeople = record
+		elems: pointer to tPerson;
+		count: integer;
+	end record
+
+	tSubscription = record
+		id: integer;
+		document: string;
+		startDate: tDate;
+		endDate: tDate;
+		plan: string;
+		price: real;
+		numDevices: integer;
+	end record
+
+	tSubscriptionNode = record
+		elem : tSubscription;
+		next : pointer to tSubscriptionNode;
+	end record
+
+	tSubscriptionsList = record
+		first : pointer to tSubscriptionNode;
+	end record
+
+	tPeopleStack = stack(tPerson);
+end type
+
+{ Ejercicio 2a }
+function spent_by_cl_in_node(cl: tPerson, node: tSubscriptionNode): real
+	var
+		months : integer;
+		amount : real;
+	var end
+
+	if cl.document != lSubs.first.document then
+		return spent_by_cl_in_node(cl, node.next);
+	end if
+	months := number_months(cl.startDate, cl.endDate);
+	amount := lSubs.first.price  integerToReal(months);
+	return amount;
+end function
+
+{ Pre: cl=CL && lSubs=LSUBS }
+function total_spent_by_client(cl: tPerson, lSubs:tSubscriptionsList): real
+	return spent_by_cl_in_node(cl, lSubs.first);	
+end function
+
+{ Ejercicio 2b }
+action find_big_spender(in cls:tPeople, in count:integer, 
+	in lSubs:tSubscriptionsList, in amount:real, out stack:tPeopleStack)
+	var
+		cl : tPerson;
+	end var
+
+	if (count < cls.count) then
+		find_big_spender(cls, count + 1, lSubs, amount, stack);
+		cl := cls.elems[count];
+		if total_spent_by_client(cl, lSubs) >= amount then
+			push(cl, stack);	
+		end if
+	end if
+end action
+
+{ Pre: cls=CLS && lSubs=LSUBS }
+function stack_large_clients (cls:tPeople, lSubs:tSubscriptionsList, amount: real): tPeopleStack
+	var
+		stack : tPeopleStack;
+	end var
+
+	stack := createStack();
+	find_big_spender(cls, 0, lSubs, amount, stack);		
+	return stack;
+end function
