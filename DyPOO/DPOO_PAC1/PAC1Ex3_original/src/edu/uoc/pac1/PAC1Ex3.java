@@ -20,37 +20,23 @@ public class PAC1Ex3 {
     };
 
     public static double getBaseDropProbability(int chunkRow, int chunkColumn) {
-        return SPAWN_PROBABILITIES[chunkRow][chunkColumn];
+        //TODO
     }
 
     public static boolean isValidCoordinate(int globalX, int globalY) {
-        return globalX >= 0 && globalX < MAX_COLUMNS * CHUNK_SIZE && globalY >= 0 && globalY < MAX_ROWS * CHUNK_SIZE;
+        //TODO
     }
 
     public static int[] getChunk(int globalX, int globalY) {
-        return new int[]{globalY / CHUNK_SIZE, globalX / CHUNK_SIZE};
+        //TODO
     }
 
     public static double calculateLevelAdjustment(int mobLevel, int playerLevel) {
-        double levelAdjustment = 0.5 + (mobLevel - playerLevel) / 30.0;
-        if (levelAdjustment < 0.0) {
-            levelAdjustment = 0.0;
-        }
-        if (levelAdjustment > 1.0) {
-            levelAdjustment = 1.0;
-        }
-        return levelAdjustment;
+        //TODO
     }
 
     public static double calculateDropProbability(int globalX, int globalY, int mobLevel, int playerLevel) {
-        int []chunkCoords;
-
-        if (isValidCoordinate(globalX, globalY)) {
-            chunkCoords = getChunk(globalX, globalY);
-            return getBaseDropProbability(chunkCoords[0], chunkCoords[1]) * calculateLevelAdjustment(mobLevel, playerLevel);
-        } else {
-            return 0.0;
-        }
+        //TODO
     }
 
 }

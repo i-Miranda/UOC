@@ -9,27 +9,64 @@ public class PAC1Ex2 {
     private static final double MAX_IMPACT_DENSITY = 0.25;
 
     public static double getZoneArea(int zoneIndex) {
-        //TODO
+        return ZONES_AREAS[zoneIndex];
     }
 
     public static double calculateImpactDensity(int impacts, int zoneIndex) {
-        //TODO
+        return (double) impacts / getZoneArea(zoneIndex);
     }
 
     public static boolean needsUrgentRepair(int impacts, int zoneIndex) {
-        //TODO
+        return calculateImpactDensity(impacts, zoneIndex) >= MAX_IMPACT_DENSITY;
     }
 
     public static int calculateTotalImpacts(int[] impactsArray) {
-        //TODO
+        int totalImpacts = 0;
+        int i;
+
+        for (i = 0; i < impactsArray.length; i++) {
+            totalImpacts += impactsArray[i];
+        }
+        return totalImpacts;
     }
 
     public static int getMostDamagedZone(int[] impactsArray) {
-        //TODO
+        int mostDamagedZone = 0;
+        double currentImpactDensity = 0;
+        double mostDamagedZoneImpactDensity = 0;
+        int i;
+
+        for (i = 0; i < impactsArray.length; i++) {
+            currentImpactDensity = calculateImpactDensity(impactsArray[i], i);
+            if (currentImpactDensity > mostDamagedZoneImpactDensity) {
+                mostDamagedZone = i;
+                mostDamagedZoneImpactDensity = currentImpactDensity;
+            }
+        }
+        return mostDamagedZone;
     }
 
     public static void printDamageReport(String[] zoneNames, int[] impactsArray) {
-        //TODO
+        int zonesThatNeedUrgentRepair = 0;
+        int i = 0;
+
+        System.out.println("Meteor impact damage report:");
+        do {
+            System.out.print("\t");
+            System.out.print(zoneNames[i]);
+            System.out.print(": DENSITY ");
+            System.out.print(String.valueOf(Math.round(calculateImpactDensity(impactsArray[i], i) * 1000.0) / 1000.0));
+            if (needsUrgentRepair(impactsArray[i], i)) {
+                zonesThatNeedUrgentRepair++;
+                System.out.println(" (URGENT REPAIR REQUIRED)");
+            } else {
+                System.out.println(" (Normal)");
+            }
+            i++;
+        } while (i < impactsArray.length);
+        System.out.println("Total impacts: " + String.valueOf(calculateTotalImpacts(impactsArray)));
+        System.out.println("Most damaged zone: " + String.valueOf(zoneNames[getMostDamagedZone(impactsArray)]));
+        System.out.println("Urgent repairs needed in " + String.valueOf(zonesThatNeedUrgentRepair) + " zones.");
     }
 
 }
