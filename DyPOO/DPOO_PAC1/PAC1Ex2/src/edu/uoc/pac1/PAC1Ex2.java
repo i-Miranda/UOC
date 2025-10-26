@@ -31,8 +31,8 @@ public class PAC1Ex2 {
     }
 
     public static int getMostDamagedZone(int[] impactsArray) {
+        double currentImpactDensity;
         int mostDamagedZone = 0;
-        double currentImpactDensity = 0;
         double mostDamagedZoneImpactDensity = 0;
         int i;
 
@@ -55,7 +55,7 @@ public class PAC1Ex2 {
             System.out.print("\t");
             System.out.print(zoneNames[i]);
             System.out.print(": DENSITY ");
-            System.out.print(String.valueOf(Math.round(calculateImpactDensity(impactsArray[i], i) * 1000.0) / 1000.0));
+            System.out.print(Math.round(calculateImpactDensity(impactsArray[i], i) * 1000.0) / 1000.0);
             if (needsUrgentRepair(impactsArray[i], i)) {
                 zonesThatNeedUrgentRepair++;
                 System.out.println(" (URGENT REPAIR REQUIRED)");
@@ -64,9 +64,9 @@ public class PAC1Ex2 {
             }
             i++;
         } while (i < impactsArray.length);
-        System.out.println("Total impacts: " + String.valueOf(calculateTotalImpacts(impactsArray)));
-        System.out.println("Most damaged zone: " + String.valueOf(zoneNames[getMostDamagedZone(impactsArray)]));
-        System.out.println("Urgent repairs needed in " + String.valueOf(zonesThatNeedUrgentRepair) + " zones.");
+        System.out.println("Total impacts: " + calculateTotalImpacts(impactsArray));
+        System.out.println("Most damaged zone: " + zoneNames[getMostDamagedZone(impactsArray)]);
+        System.out.println("Urgent repairs needed in " + zonesThatNeedUrgentRepair + " zones.");
     }
 
 }
