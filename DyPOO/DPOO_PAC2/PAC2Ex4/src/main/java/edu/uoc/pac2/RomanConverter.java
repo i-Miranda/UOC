@@ -27,20 +27,17 @@ public class RomanConverter {
         if (roman == null || roman.isBlank()) {
             throw new IllegalArgumentException("Invalid Roman numeral format.");
         }
+        StringBuilder romanBuilder = new StringBuilder();
+        char current;
         int result = 0;
-        int current;
         for (int i = 0; i < roman.length(); i++) {
-            current = 0;
-            if ((roman.charAt(i) == 'C'|| roman.charAt(i) == 'X' || roman.charAt(i) == 'I') && roman.length() > i ) {
-               current = romanToDecimal(roman.substring(i));
+            current = roman.charAt(i);
+            if (current == romanBuilder.charAt(romanBuilder.length() - 1)) {
+                romanBuilder.append(current);
             }
-            else {
-                current = romanCharToInt(roman.charAt(i));
-            }
-            if (current < 0) {
-                throw new IllegalArgumentException("Invalid Roman numeral format.");
-            }
-            result += current;
+        }
+        if (romanBuilder.isEmpty()) {
+            throw new IllegalArgumentException("Invalid Roman numeral format.");
         }
         return result;
     }
