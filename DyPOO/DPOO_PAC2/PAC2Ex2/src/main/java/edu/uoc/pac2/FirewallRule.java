@@ -406,12 +406,21 @@ public class FirewallRule {
      */
     public int countMatchingRulesByAction(String[] sourceIP, String[] destinationIP, String[] protocol, int[] port, String action) {
         int count = 0;
-        if (!getAction().equals(action) || !areInputsValid(sourceIP, destinationIP , protocol, port)) {
+        if (action == null || getAction() == null || !getAction().equals(action)) {
+            return count;
+        }
+        if (sourceIP == null || destinationIP == null || protocol == null || port == null) {
+            return count;
+        }
+        if (sourceIP.length != destinationIP.length || destinationIP.length != protocol.length || protocol.length != port.length) {
             return count;
         }
         for (int index = 0; index < sourceIP.length; index++) {
-            if (isApplicable(sourceIP[index], destinationIP[index],
-                    protocol[index], port[index])) {
+            if (!isValidIP(sourceIP[index]) || !isValidIP(destinationIP[index]) || !isValidProtocol(protocol[index])
+                    || port[index] < minPort || port[index] > maxPort) {
+                continue;
+            }
+            if (isApplicable(sourceIP[index], destinationIP[index], protocol[index], port[index])) {
                 count++;
             }
         }
