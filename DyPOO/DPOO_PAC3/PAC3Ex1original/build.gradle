@@ -1,0 +1,61 @@
+plugins {
+    id 'java'
+}
+
+group = 'edu.uoc.pac3'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.register('testSanity', Test) {
+    group = "Verification"
+    useJUnitPlatform {
+        includeTags "sanity"
+    }
+    testSanity.outputs.upToDateWhen { false }
+}
+
+tasks.register('testMinimum', Test) {
+    group = "Verification"
+    useJUnitPlatform {
+        includeTags "sanity", "minimum"
+    }
+    testMinimum.outputs.upToDateWhen { false }
+}
+
+tasks.register('testAdvanced', Test) {
+    group = "Verification"
+    useJUnitPlatform {
+        includeTags "advanced"
+    }
+    testAdvanced.outputs.upToDateWhen { false }
+}
+
+tasks.register('testSpecial', Test) {
+    group = "Verification"
+    useJUnitPlatform {
+        includeTags "special"
+    }
+    testAdvanced.outputs.upToDateWhen { false }
+}
+
+tasks.register('testAll', Test) {
+    group = "Verification"
+    useJUnitPlatform {
+        includeTags "advanced", "minimum", "sanity", "special"
+    }
+    testAdvanced.outputs.upToDateWhen { false }
+}
+
