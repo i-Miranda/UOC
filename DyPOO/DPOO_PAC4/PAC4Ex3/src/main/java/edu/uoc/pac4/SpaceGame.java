@@ -1,8 +1,11 @@
 package edu.uoc.pac4;
 
 import edu.uoc.pac4.ship.SpaceShip;
+import edu.uoc.pac4.ship.SpaceShipRolType;
+
 import java.util.List;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 
 public class SpaceGame {
     private final static int MAX_SPACESHIPS = 10;
@@ -69,5 +72,15 @@ public class SpaceGame {
         }
         return "{\"galaxyName\": \"" + galaxyName + "\", \"spaceships\": [" +
                 spaceshipsString + "]}";
+    }
+
+    public List<SpaceShip> getSpaceshipsByRolType(SpaceShipRolType rolType) {
+        return getSpaceships().stream().filter(
+                spaceShip -> spaceShip.getSpaceShipRolType() == rolType).toList();
+    }
+
+    public double getTotalCargoCapacity() {
+        return getSpaceships().stream().mapToDouble(
+                spaceShip -> spaceShip.getCargoCapacity()).sum();
     }
 }
