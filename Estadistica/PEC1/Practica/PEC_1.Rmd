@@ -1,0 +1,116 @@
+---
+title: 'PEC1: Estadística Descriptiva y Muestreo'
+author: "UOC"
+date: "2026-03-06"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("dplyr")
+library("knitr")
+library("ggplot2")
+```
+
+### NOMBRE:
+
+Indique claramente el nombre y apellidos en la primera página del informe. Resuelva los ejercicios utilizando R siempre que sea necesario; es importante mostrar cada uno de los pasos realizados para llegar al resultado final. Indique en cada caso qué instrucciones de R ha utilizado y las salidas que se obtienen.
+
+**Importante: el informe final se entregará en un archivo con formato "pdf". No se debe entregar el archivo con formato "Rmd" ni se acepatará el informe en ningúnotro formato**
+
+**Esta PEC debe realizarse de forma estrictamente individual, quedando totalmente prohibido el uso de herramientas de IA.** Cualquier indicio de copia será penalizado con un suspenso (D) para todas las partes implicadas y la posible evaluación negativa de la asignatura de forma íntegra.
+
+**Recordatorio: Verificación de autoría mediante entrevista de contraste.**
+Esta actividad está sujeta a la verificación de la autoría, la cual puede incluir entrevistas de contraste, tal como se describe en el plan docente de la asignatura. En caso de que el profesorado lo considere necesario, se podrá convocar al estudiante para realizar una entrevista con el objetivo de comprobar la correspondencia entre el contenido presentado y los conocimientos adquiridos, así como la autoría independiente de la actividad. Encontraréis más información en el plan docente de la asignatura.
+
+**Introducción**
+
+El objetivo de esta PEC es analizar la gestión de residuos en una muestra de municipios.
+Los datos se encuentran en el archivo *Municipios_Sostenibles.csv*. Este dataset incluye
+información sobre la población, el tipo de municipio y los principales indicadores de reciclaje.
+
+Variables:
+
+- *Municipio_ID*: Identificador único.
+- *Habitantes*: Número de personas residentes.
+- *Tipo_Municipio*: Categoría (Urbano, Rural, Turístico).
+- *Residuos_kg_capita*: Kilogramos de residuos generados por persona y año.
+- *Tasa_Reciclaje*: Porcentaje de recogida selectiva.
+- *Coste_Gestion_EUR*: Coste por habitante de la gestión de residuos.
+- *Puerta_a_Puerta*: Si el municipio tiene implementado este sistema (Sí/No).
+
+## Problema 1
+
+(4 puntos) Importe los datos del archivo *Municipios_Sostenibles.csv* al programa R.
+
+```{r problema 1}
+sostenibles <- read.csv("Municipios_Sostenibles.csv")
+```
+
+Una agencia ambiental quiere evaluar la eficiencia de los municipios.
+
+  a) Describa el tipo de cada variable (Nominal, Ordinal, Discreta o Continua). Justifique la respuesta basándose en los apuntes de la asignatura.
+  
+```{r 1a}
+#Espacio para la solución
+```
+
+  b) Calcule un resumen numérico completo (media, mediana, cuartiles y desviación típica) de la variable Tasa_Reciclaje. ¿Qué nos indica la diferencia entre la media y la mediana sobre la simetría de los datos?
+  
+```{r 1b}
+tr_sumario <- sostenibles %>%
+                summarize(media = mean(Tasa_Reciclaje),
+                          mediana = median(Tasa_Reciclaje),
+                          Q1 = quantile(Tasa_Reciclaje, prob = .25),
+                          Q2 = quantile(Tasa_Reciclaje, prob = .50),
+                          Q3 = quantile(Tasa_Reciclaje, prob = .75),
+                          desviacion_tipica = sd(Tasa_Reciclaje))
+kable(tr_sumario, caption = "Sumario de Tasa_Reciclaje")
+```
+
+  c) Cree una nueva variable denominada Eficiencia_Coste que sea el resultado de dividir la Tasa_Reciclaje entre el Coste_Gestion_EUR. Presente las primeras 5 filas de la nueva variable.
+  
+```{r 1c}
+Eficiencia_Coste <- sostenibles$Tasa_Reciclaje / sostenibles$Coste_Gestion_EUR
+
+kable(Eficiencia_Coste[1:5], caption = "Eficiencia Coste de las primeras 5 filas")
+```
+
+  d) Realice una descripción estadística de la variable cualitativa Tipo_Municipio. Calcule la tabla de frecuencias absolutas y frecuencias relativas, y represente la distribución de los datos mediante un gráfico de sectores. ¿Qué categoría de municipio es la más frecuente en la muestra?
+  
+```{r 1d}
+#Espacio para la solución
+```
+
+## Problema 2
+
+(3 puntos) La agencia sospecha que el sistema de recogida influye en los resultados.
+
+  a) Realice un diagrama de cajas (boxplot) de la Tasa_Reciclaje según si el municipio utiliza el sistema Puerta_a_Puerta. Comente las diferencias observadas en la dispersión y en los valores centrales.
+  
+```{r 2a}
+ggplot(sostenibles, aes(x = Puerta_a_Puerta, y = Tasa_Reciclaje)) +
+  geom_boxplot()
+```
+
+  b) Si un municipio presenta una tasa de reciclaje del 90 %, ¿lo consideraría un “outlier”? Razone la respuesta según el concepto de datos atípicos de los apuntes. 
+   
+```{r 2b}
+#Espacio para la solución
+```
+
+## Problema 3
+
+(3 puntos) Se quiere realizar una encuesta detallada a 15 municipios para conocer la opinión de la ciudadanía.
+
+  a) Explique cómo aplicaría un muestreo estratificado para asegurar que los tres tipos de municipios (Rural, Urbano, Turístico) estén representados proporcionalmente. Cite en qué parte de los apuntes ha encontrado cómo hacerlo.
+ 
+```{r 3a} 
+#Espacio para la solución
+```
+
+b) ¿Por qué en este contexto sería mejor un muestreo estratificado que un muestreo aleatorio simple? Justifique la respuesta basándose en la representatividad de la muestra.
+
+```{r 3b}
+#Espacio para la solución
+```

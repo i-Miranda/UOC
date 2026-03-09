@@ -1,0 +1,52 @@
+---
+title: "Presentación R0"
+author: "Ivan Miranda Moral"
+date: "22-02-2026"
+output: pdf_document
+---
+
+# Presentación
+  
+Buenos días a todos,
+
+Me llamo Ivan Miranda Moral y estoy cursando el cuarto semestre del Grado en Ingeniería Informática. Actualmente trabajo en animación 2D y me gustaría combinar lo que estoy aprendiendo aquí en la UOC con mis conocimientos para desarrollar mis propias aplicaciones multimedia. 
+
+Encantado de conoceros y os deseo mucha suerte durante el semestre.
+
+Un saludo,
+
+Ivan
+
+# Sumas, Restas y Boxplot en R
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(prompt = TRUE, comment = "")
+```
+## Suma
+
+```{r}
+suma_a <- 110
+suma_b <- 234
+suma <- suma_a + suma_b
+suma
+```
+
+## Resta
+
+```{r}
+resta_a <- 83
+resta_b <- 11
+resta <- resta_a - resta_b
+resta
+```
+\newpage
+
+## Boxplot
+
+```{r}
+datos <- c(2, 2, 4, 4, 5, 5, 6, 6, 7, 8, 9, 50)
+boxplot(datos,
+        ylim = c(0, 60),
+        col = "#1B9E77",
+        main = "Boxplot",
+        ylab = "Unidades")
+```
