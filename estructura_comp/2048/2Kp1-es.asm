@@ -1,7 +1,7 @@
 section .note.GNU-stack noalloc noexec nowrite progbits
 section .data               
 ;Cambiar Nombre y Apellido por vuestros datos.
-developer db "_Nombre_ _Apellido1_",0
+developer db "_Ivan_ _Miranda_",0
 
 ;Constante que también está definida en C.
 DIMMATRIX    equ 4      
@@ -229,17 +229,46 @@ getchP1:
 showNumberP1:
    push rbp
    mov  rbp, rsp
+   push rbx ;
    ;guardar el estado de los registros que se modifican en esta 
    ;subrutina y que no se utilizan para devolver valores.
-   
-   
-  
+   mov rax, [number]
+   xor rcx, rcx						; (i) : used for the for loop
+   cmp rax, 0
+   jl sn_num_zero
+   cmp rax, 999999
+   jg sn_num_999999
+   jmp sn_for
+   sn_num_zero:
+		xor rax, rax
+		jmp sn_for
+   sn_num_999999:
+		mov rax, 999999
+   ; --------------FOR LOOP-------------
+   sn_for:
+		cmp rcx, 6					; while (i) < 6
+		jge sn_end
+		mov byte [charac], 32	; ' ' ascii code
+		cmp rax, 0 					; this if keeps numbers right-aligned
+		jle sn_for_zero
+
+		xor rdx, rdx
+		mov rbx, 10
+		div rbx
+		add dl, 48 					; the value that adds '0' to charac
+		mov byte [charac], dl
+   sn_for_zero: 
+		call gotoxyP1
+		call printchP1
+		dec dword [colScreen]
+		inc rcx
+		jmp sn_for
    sn_end: 
-   ;restaurar el estado de los registros que se han guardado en la pila.
-   
-   mov rsp, rbp
-   pop rbp
-   ret
+		;restaurar el estado de los registros que se han guardado en la pila.
+		pop rbx
+		mov rsp, rbp
+		pop rbp
+		ret
 
 
 ;;;;;
@@ -270,12 +299,57 @@ updateBoardP1:
    mov  rbp, rsp
    ;guardar el estado de los registros que se modifican en esta 
    ;subrutina y que no se utilizan para devolver valores.
-   
-   
-   
+   push r12										; r12d = rowScreenAux
+   push r13										; r13d = i
+   push r14										; r14d = colScreenAux
+   push r15										; r15d = j 
+
+   mov r12d, 10									;rowScreenAux = 10
+   xor r13d, r13d								;i = 0
+   ub_for:
+		cmp r13d, DIMMATRIX
+		jge ub_end
+		mov r14d, 17							;colScreenAux = 17
+		xor r15d, r15d							;j = 0
+		ub_inner_for:
+			cmp r15d, DIMMATRIX
+			jge ub_for_inc
+
+			mov eax, r13d
+			imul eax, DIMMATRIX
+			add eax, r15d
+			cdqe								; convert eax to rax?
+
+			mov eax, dword [m + rax * 4]
+			mov qword [number], rax
+
+			mov dword [rowScreen], r12d
+			mov dword [colScreen], r14d
+			call showNumberP1
+
+			add r14d, 9
+			inc r15d
+			jmp ub_inner_for
+   ub_for_inc:
+		add r12d, 2
+		inc r13d
+		jmp ub_for
    ub_end:
+		mov rax, qword [score]
+		mov qword [number], rax
+		mov dword [rowScreen], 18
+		mov dword [colScreen], 35
+   		call showNumberP1
+
+		mov dword [rowScreen], 18
+		mov dword [colScreen], 36
+   		call gotoxyP1
    ;restaurar el estado de los registros que se han guardado en la pila.
-   
+   pop r15
+   pop r14
+   pop r13
+   pop r12
+
    mov rsp, rbp
    pop rbp
    ret
@@ -300,11 +374,34 @@ copyMatrixP1:
    mov  rbp, rsp
    ;guardar el estado de los registros que se modifican en esta 
    ;subrutina y que no se utilizan para devolver valores.
-   
-   
-   
+   push r12
+   push r13
+
+   xor r12d, r12d
+   cm_for:
+		cmp r12d, DIMMATRIX
+		jge cm_end
+   		xor r13d, r13d
+		cm_inner_for:
+			cmp r13d, DIMMATRIX
+			jge cm_for_inc
+
+			mov eax, r12d
+			imul eax, DIMMATRIX
+			add eax, r13d
+
+			mov edx, dword [mRotated + rax * 4]
+			mov dword [m + rax * 4], edx
+
+			inc r13d
+			jmp cm_inner_for
+   cm_for_inc:
+   		inc r12d
+		jmp cm_for
    cm_end:
    ;restaurar el estado de los registros que se han guardado en la pila.
+   pop r13
+   pop r12
       
    mov rsp, rbp
    pop rbp
@@ -349,11 +446,63 @@ rotateMatrixLRP1:
    mov  rbp, rsp
    ;guardar el estado de los registros que se modifican en esta 
    ;subrutina y que no se utilizan para devolver valores.
-   
-   
-   
+   push r12
+   push r13
+   push rbx
+ 
+   xor r12d, r12d
+   rm_for:
+		cmp r12d, DIMMATRIX 
+		jge rm_end
+   		xor r13d, r13d
+   		rm_inner_for:
+			cmp r13d, DIMMATRIX 
+			jge rm_for_inc
+  
+			mov eax, r12d
+			imul eax, DIMMATRIX
+			add eax, r13d
+			mov edx, dword [m + rax * 4]
+
+			cmp byte [dir], 76 ; 'L' ascii code
+			jne rm_check_r
+
+			; dest row = DIMMATRIX-i-j
+			mov ebx, DIMMATRIX
+			dec ebx
+			sub ebx, r13d
+			
+			mov ecx, ebx
+			imul ecx, DIMMATRIX
+			add ecx, r12d
+
+			mov dword [mRotated + rcx * 4], edx
+			jmp rm_inner_for_inc
+			rm_check_r:
+				cmp byte [dir], 82 ; 'R' ascii code
+				jne rm_inner_for_inc
+				
+				mov ebx, DIMMATRIX
+				dec ebx
+				sub ebx, r12d
+
+				mov ecx, r13d
+				imul ecx, DIMMATRIX
+				add ecx, ebx
+
+				mov dword [mRotated + rcx * 4], edx
+		rm_inner_for_inc:
+			inc r13d
+			jmp rm_inner_for
+   rm_for_inc:
+		inc r12d
+		jmp rm_for
    rm_end:
+   		call copyMatrixP1
    ;restaurar el estado de los registros que se han guardado en la pila.
+   pop rbx
+   pop r13
+   pop r12
       
    mov rsp, rbp
    pop rbp
@@ -389,11 +538,80 @@ shiftNumbersLP1:
    mov  rbp, rsp
    ;guardar el estado de los registros que se modifican en esta 
    ;subrutina y que no se utilizan para devolver valores.
-   
-   
-   
+   push r12	; i = 0	
+   push r13	; j = 0
+   push r14	; k = 0
+
+   xor r12d, r12d	; i = 0
+   shn_for:
+		cmp r12d, DIMMATRIX
+		jge shn_end
+		
+		xor r13d, r13d
+		shn_inner_for:
+			mov ebx, DIMMATRIX
+			dec ebx
+			cmp r13d, ebx
+			jge shn_for_inc
+
+			;cmp m[i][j], 0
+			mov eax, r12d
+			imul eax, DIMMATRIX
+			add eax, r13d
+			mov edx, dword [m + rax * 4]
+			cmp edx, 0
+			jne shn_inner_for_inc
+
+			mov r14d, r13d
+			inc r14d
+			shn_while:						;increment k while true
+				cmp r14d, DIMMATRIX
+				jge shn_inner_for_inc
+
+				;cmp m[i][j], 0
+				mov eax, r12d
+				imul eax, DIMMATRIX
+				add eax, r14d
+				mov edx, dword [m + rax * 4]
+				cmp edx, 0
+				jne shn_after_while
+
+				inc r14d
+				jmp shn_while
+
+			shn_after_while:
+				cmp r14d, DIMMATRIX
+				jge shn_inner_for_inc
+
+				;mov m[i][j], m[i][k]
+				mov eax, r12d
+				imul eax, DIMMATRIX
+				add eax, r14d
+				mov edx, dword [m + rax * 4]
+
+				mov eax, r12d
+				imul eax, DIMMATRIX
+				add eax, r13d
+				mov dword [m + rax * 4], edx
+
+				;mov m[i][k] = 0
+				mov eax, r12d
+				imul eax, DIMMATRIX
+				add eax, r14d
+				mov dword [m + rax * 4], 0
+
+				mov word [state], 2
+		shn_inner_for_inc:
+			inc r13d
+			jmp shn_inner_for
+   shn_for_inc:
+   		inc r12d
+		jmp shn_for
    shn_end:
    ;restaurar el estado de los registros que se han guardado en la pila.
+   pop r14
+   pop r13
+   pop r12
       
    mov rsp, rbp
    pop rbp
@@ -432,12 +650,71 @@ addPairsLP1:
    mov  rbp, rsp
    ;guardar el estado de los registros que se modifican en esta 
    ;subrutina y que no se utilizan para devolver valores.
+   push rbx
+   push r12
+   push r13
+   push r14
    
-   
-   
+   xor r14d, r14d						; p = 0
+   xor r12d, r12d						; i = 0
+   ap_for:
+   		cmp r12d, DIMMATRIX
+		jge ap_after_for
+		xor r13d, r13d					; j = 0
+		ap_inner_for:
+			mov eax, DIMMATRIX
+			dec eax
+			cmp r13d, eax
+			jge ap_for_inc
+
+			; load m[i][j]
+			mov eax, r12d
+			imul eax, DIMMATRIX
+			add eax, r13d
+
+			mov edx, dword [m + rax * 4]
+			cmp edx, 0
+			je ap_inner_for_inc
+
+			mov ecx, eax
+			inc ecx
+
+			mov ebx, dword [m + rcx * 4]
+			cmp edx, ebx
+			jne ap_inner_for_inc	
+
+			;mov m[i][j], m[i][j] * 2
+			add edx, edx 						; times 2
+			mov dword [m + rax * 4], edx
+
+			;mov m[i][j + 1], 0
+			mov dword [m + rcx * 4], 0
+
+			;p += m[i][j]
+			add r14d, edx
+			inc r13d
+			
+		ap_inner_for_inc:
+  			inc r13d
+			jmp ap_inner_for
+   ap_for_inc:
+   		inc r12d
+		jmp ap_for
+   ap_after_for:
+   		cmp r14d, 0
+		jle ap_end
+
+		mov eax, r14d
+		cdqe
+		add qword [score], rax
+		mov word [state], 2
    ap_end:                         
    ;restaurar el estado de los registros que se han guardado en la pila.
-   
+   pop r14 
+   pop r13 
+   pop r12 
+   pop rbx 
+
    mov rsp, rbp
    pop rbp
    ret
