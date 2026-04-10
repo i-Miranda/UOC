@@ -248,19 +248,19 @@ showNumberP1:
    sn_for:
 		cmp rcx, 6					; while (i) < 6
 		jge sn_end
-		mov byte [charac], 32	; ' ' ascii code
+		mov byte [charac], 32		; ' ' ascii code
 		cmp rax, 0 					; this if keeps numbers right-aligned
 		jle sn_for_zero
 
 		xor rdx, rdx
-		mov rbx, 10
-		div rbx
-		add dl, 48 					; the value that adds '0' to charac
+		mov rbx, 10					; decimal base
+		div rbx						; rax is the quotient, rdx is the remainder
+		add dl, 48 					; converts digit to ASCII
 		mov byte [charac], dl
    sn_for_zero: 
 		call gotoxyP1
 		call printchP1
-		dec dword [colScreen]
+		dec dword [colScreen]		; next left digit
 		inc rcx
 		jmp sn_for
    sn_end: 
@@ -318,7 +318,7 @@ updateBoardP1:
 			mov eax, r13d
 			imul eax, DIMMATRIX
 			add eax, r15d
-			cdqe								; convert eax to rax?
+			cdqe								; expand index to 64 bits
 
 			mov eax, dword [m + rax * 4]
 			mov qword [number], rax
@@ -327,7 +327,7 @@ updateBoardP1:
 			mov dword [colScreen], r14d
 			call showNumberP1
 
-			add r14d, 9
+			add r14d, 9							; next cell in same row
 			inc r15d
 			jmp ub_inner_for
    ub_for_inc:
@@ -467,7 +467,7 @@ rotateMatrixLRP1:
 			cmp byte [dir], 76 ; 'L' ascii code
 			jne rm_check_r
 
-			; dest row = DIMMATRIX-i-j
+			; dest row = DIMMATRIX-i-j 
 			mov ebx, DIMMATRIX
 			dec ebx
 			sub ebx, r13d
@@ -482,6 +482,7 @@ rotateMatrixLRP1:
 				cmp byte [dir], 82 ; 'R' ascii code
 				jne rm_inner_for_inc
 				
+				; dest row = j 
 				mov ebx, DIMMATRIX
 				dec ebx
 				sub ebx, r12d
@@ -549,9 +550,9 @@ shiftNumbersLP1:
 		
 		xor r13d, r13d
 		shn_inner_for:
-			mov ebx, DIMMATRIX
-			dec ebx
-			cmp r13d, ebx
+			mov eax, DIMMATRIX
+			dec eax
+			cmp r13d, eax
 			jge shn_for_inc
 
 			;cmp m[i][j], 0
@@ -600,7 +601,7 @@ shiftNumbersLP1:
 				add eax, r14d
 				mov dword [m + rax * 4], 0
 
-				mov word [state], 2
+				mov word [state], 2  ; flag that there was a shift
 		shn_inner_for_inc:
 			inc r13d
 			jmp shn_inner_for
