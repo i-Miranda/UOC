@@ -1,0 +1,194 @@
+---
+title: 'PEC2: Probabilidad'
+author: "Ivan Miranda Moral"
+date: "2026-03-22"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("dplyr")
+library("knitr")
+library("ggplot2")
+
+setwd("~/Developer/GitHub/UOC/Estadistica/PEC2/Practica")
+load("Datos_probabilidad.RData")
+```
+
+La siguiente práctica de la PEC2 presenta un ejercicio de cálculo de probabilidad. Se recomienda generar el informe con Rmarkdown que genera automáticamente el pdf a entregar. Hay que entregar la práctica en fichero pdf. Toda entrega con un formato diferente a pdf será evaluada con un 0.
+
+Esta PEC debe realizarse de forma estrictamente individual, quedando del todo prohibido el uso de herramientas de IA. Cualquier indicio de copia será penalizado con un suspenso (D) por todas las partes implicadas y la posible evaluación negativa de la asignatura de forma íntegra. La actividad está sujeta a la verificación de la autoría, la cual puede incluir entrevistas de contraste, tal como se describe en el plan docente de la asignatura. En caso de que el profesorado lo considere necesario, se podrá convocar al estudiante para realizar una entrevista con el objetivo de comprobar la correspondencia entre el contenido presentado y los conocimientos adquiridos, así como la autoría independiente de la actividad. Encontraréis más información en el plan docente de la asignatura.
+
+### Enunciado
+
+En la base de datos de la PEC2 (*Datos_probabilidad.RData*), encontraréis los resultados de evaluar un test diagnóstico de cierta enfermedad en una población. La base de datos contiene información de 200 pacientes (*filas*) y 4 variables (*ID*, *Enfermedad (sí/no)*, *Test (resultado positivo o negativo)*, *Biomarcador (numérica)*). Se definen los eventos,
+
+- E = “el paciente tiene la enfermedad”
+- NoE = “el paciente no tiene la enfermedad”
+- $+$ = “El test ha resultado positivo”
+- $-$ = “El test ha resultado negativo”
+
+Responde las siguientes preguntas:
+
+a) (0.5 puntos) Presenta la tabla de contingencia entre los resultados del test (positivo o negativo) y la presencia o no de la enfermedad.
+
+``` {r a}
+tabla_contingencia_a <- table(base_datos$Test, base_datos$Enfermedad)
+
+kable(tabla_contingencia_a, caption =
+        "Contingencia: Resultados del test y la presencia de la enfermedad")
+```
+
+b) (1 punto) Considerando los eventos definidos previamente representa con teoría de conjuntos (union ($\cup$), intersection ($\cap$), . . . ) el valor 122 de la tabla de contingencia previa. Calcula su probabilidad y explica el suceso.
+
+\begin{quote}
+\textcolor{blue}{
+El valor 122 corresponde al suceso $NoE \cap -$. Para calcular su probabilidad, se dividen los pacientes sanos con resultado negativo (122), entre el total de pacientes (200).
+}
+\end{quote}
+``` {r}
+
+tabla_contingencia_a["Negativo","No"] / sum(tabla_contingencia_a)
+```
+
+c) (0.5 puntos) Según la tabla de contingencia, calcula la probabilidad de tener la enfermedad.
+
+``` {r c}
+sum(tabla_contingencia_a[, "Si"]) / sum(tabla_contingencia_a)
+```
+
+d) (1 punto) Según la tabla de contingencia, calcula la probabilidad de que un paciente con un resultado positivo esté enfermo.
+
+\begin{quote}
+\textcolor{blue}{
+La probabilidad de que un paciente con resultado positivo esté enfermo es:
+}
+\end{quote}
+``` {r d}
+tabla_contingencia_a["Positivo", "Si"] / sum(tabla_contingencia_a["Positivo",])
+```
+\begin{quote}
+\textcolor{blue}{
+Esta probabilidad representa la proporción de pacientes con test positivo que realmente están enfermos.
+}
+\end{quote}
+
+e) (1 punto) Son independientes los sucesos enfermedad y test positivo?
+
+``` {r e}
+p_inter <- tabla_contingencia_a["Positivo", "Si"] / sum(tabla_contingencia_a)
+p_E <- sum(tabla_contingencia_a[, "Si"]) / sum(tabla_contingencia_a)
+p_pos <- sum(tabla_contingencia_a["Positivo", ]) / sum(tabla_contingencia_a)
+
+p_inter
+
+p_E * p_pos
+```
+
+\begin{quote}
+\textcolor{blue}{
+Como $P(E \cap +) \neq P(E) \cdot P(+)$, concluimos que los sucesos enfermedad y test positivo no son independientes.
+}
+\end{quote}
+
+f) (1 punto) Supongamos que la probabilidad de que un paciente esté sano viene dada por la proporción de sanos en la tabla de contingencia del apartado *a)*. ¿Qué probabilidad hay que tres pacientes escogidos al azar no tengan la enfermedad?
+
+\begin{quote}
+\textcolor{blue}{
+La probabilidad de que un paciente esté sano viene dada por la proporción de pacientes sin enfermedad en la muestra. Suponiendo independencia entre los pacientes seleccionados, la probabilidad de que los tres pacientes no tengan la enfermedad es:
+}
+\end{quote}
+$$P(NoE \cap NoE \cap NoE) = P(NoE)^3$$
+
+``` {r fa}
+p_sano <- sum(tabla_contingencia_a[,"No"]) / sum(tabla_contingencia_a)
+
+p_sano^3
+```
+
+\begin{quote}
+\textcolor{blue}{
+Como comprobación, se puede obtener el mismo resultado utilizando la distribución binomial:
+}
+\end{quote}
+```{r fb}
+dbinom(3,size = 3, prob = p_sano)
+```
+\begin{quote}
+\textcolor{blue}{
+Ambos resultados coinciden, ya que en este caso la probabilidad de obtener 3 éxitos en 3 ensayos es equivalente a $P(NoE)^3$.
+}
+\end{quote}
+
+g) (1 punto) Se ha diseñado un nuevo test más económico basado en un biomarcador (variable *biomarcador* de la base de datos). El nuevo test viene determinado por un punto de corte igual a 12, de forma que los pacientes con valores superiores a 12 el resultado será positivo y menor o igual a 12 el resultado será negativo. De acuerdo a este nuevo test, calcula la probabilidad de que un paciente sano tenga un resultado positivo.
+
+``` {r g}
+datos_test_nuevo <- base_datos %>%
+  mutate(Test_Nuevo = ifelse(biomarcador > 12, "Positivo", "Negativo")) 
+
+tabla_contingencia_b <- table(datos_test_nuevo$Test_Nuevo, datos_test_nuevo$Enfermedad)
+
+kable(tabla_contingencia_b, caption =
+         "Contingencia: Resultados del test y la presencia de la enfermedad")
+
+tabla_contingencia_b["Positivo", "No"] / sum(tabla_contingencia_b[, "No"])
+```
+
+\begin{quote}
+\textcolor{blue}{
+Esta probabilidad representa la proporción de falsos positivos del nuevo test.
+}
+\end{quote}
+
+h) (1 punto) Se aplica este nuevo test a otra población en la que se sabe que la probabilidad de tener la enfermedad es 5%. Utiliza el teorema de Bayes, asumiendo que ha cambiado la probabilidad de la enfermedad, para calcular la probabilidad de que un paciente esté enfermo si el resultado ha sido positivo.
+
+``` {r h}
+p_pos_E <- tabla_contingencia_b["Positivo", "Si"] / sum(tabla_contingencia_b[,"Si"])
+p_pos_NoE <- tabla_contingencia_b["Positivo", "No"] / sum(tabla_contingencia_b[,"No"])
+
+p_E <- 0.05
+p_NoE <- 1 - p_E
+
+p_h <- (p_pos_E * p_E) / (p_pos_E * p_E + p_pos_NoE * p_NoE)
+
+p_h
+```
+
+\begin{quote}
+\textcolor{blue}{
+Esto indica que, incluso con un resultado positivo, la probabilidad de estar enfermo sigue siendo baja debido a la baja prevalencia de la enfermedad.
+}
+\end{quote}
+
+i) (1 punto) En esta nueva población, calcula la probabilidad de que un paciente esté sano si el resultado ha sido negativo.
+
+``` {r i}
+p_neg_NoE <- 1 - p_pos_NoE
+p_neg_E <- 1 - p_pos_E
+
+p_i <- (p_neg_NoE * p_NoE) / (p_neg_NoE * p_NoE + p_neg_E * p_E)
+
+p_i
+```
+
+\begin{quote}
+\textcolor{blue}{
+Esto indica que un resultado negativo es muy fiable para descartar la enfermedad.
+}
+\end{quote}
+
+j) (1 punto) En esta nueva población, calcula la probabilidad de que un paciente al azar esté sano y tenga un resultado negativo.
+
+``` {r j}
+p_j <- p_NoE * p_neg_NoE
+
+p_j
+```
+
+k) (1 punto) En esta nueva población, calcula la probabilidad de que un paciente al azar tenga un resultado negativo.
+
+``` {r k}
+p_k <- p_neg_E * p_E + p_neg_NoE * p_NoE
+
+p_k
+```

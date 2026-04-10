@@ -1,0 +1,278 @@
+---
+title: 'PEC3: Probabilidad y Variables Aleatorias'
+author: "Ivan Miranda Moral"
+date: "2026-04-04"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("dplyr")
+library("knitr")
+library("ggplot2")
+
+setwd("~/Developer/GitHub/UOC/Estadistica/PEC2/Practica")
+load("Datos_probabilidad.RData")
+```
+
+## Introducción
+
+En todas las preguntas, tenéis que indicar qué tipo de variable aleatoria usáis y plantear la probabilidad que se pide, como por ejemplo P (X = 4) etc, antes de poner las instrucciones y hacer los cálculos con R. Procurad usar las funciones: dnorm, pnorm, dbinom, etc.
+
+Toda respuesta que no lleve todas estas explicaciones, con los comentarios pertinentes, será considerada incorrecta aunque se dé un resultado numérico correcto.
+
+Os puede ser útil consultar el siguiente material:
+- Manuales de R.
+- Reto 2: Probabilidad y variables aleatorias (sesión 5 a 8).
+- Reto 2: Actividades Resueltas (Variables aleatorias).
+
+## Pregunta 1 (resolver con R). (4 puntos).
+
+Suponga que los salarios mensuales de los empleados de una empresa se distribuyen normalmente, con una media de 700 euros y una desviación estándar de 40 euros. Sea X la variable aleatoria que representa el salario mensual de un empleado seleccionado al azar.
+
+\begin{quote}
+\textcolor{blue}{ Sabemos que $X \sim N( \mu =700, \sigma =40)$ }
+\end{quote}
+a) Calcule la probabilidad de que su salario sea menor que 650 euros. (1 punto).
+\begin{quote}
+\textcolor{blue}{ Queremos $P(X < 650)$ }
+\end{quote}
+``` {r 1a}
+pnorm(650, mean = 700, sd = 40)
+```
+\begin{quote}
+\textcolor{blue}{ Aproximadente \textbf{10.56\% de los empleados} ganan menos de 650€. }
+\end{quote}
+
+b) Calcule la probabilidad de que la diferencia entre su salario y el salario medio sea menor que 3 euros. (1 punto).
+\begin{quote}
+\textcolor{blue}{ Queremos $\lvert X - 700 \lvert < 3$ }
+\end{quote}
+\begin{quote}
+\textcolor{blue}{ Esto equivale a $697 < X < 703$ }
+\end{quote}
+``` {r 1b}
+pnorm(703, 700, 40) - pnorm(697, 700, 40)
+```
+\begin{quote}
+\textcolor{blue}{ $$P(|X - 700| < 3) = P(697 < X < 703) = 0.0598$$ }
+\end{quote}
+\begin{quote}
+\textcolor{blue}{Aproximadamente \textbf{5.98\% de los empleados} tienen un salario a menos de 3€ de la media.}
+\end{quote}
+c) Calcula la probabilidad de que un empleado elegido al azar tenga exactamente un salario de 700. Justifique la respuesta basándose en los apuntes de la asignatura, indicando la sesión y la página de los mismos. (1 punto).
+\begin{quote}
+\textcolor{blue}{ Queremos $P(X = 700)$ cuando $X \sim N(700, 40)$}
+\end{quote}
+\begin{quote}
+\textcolor{blue}{
+La distribución normal es \textbf{continua} y en variables aleatorias continuas \textbf{la probabilidad de un valor exacto es cero.} Como indican los apuntes, "no tiene sentido calcular $P(X=x)$, sino probabilidades en intervalos." Esto se debe a que:
+\begin{itemize}
+\item La probabilidad se obtiene como \textbf{área bajo la curva}
+\item Un punto concreto \textbf{no tiene area} \end{itemize}
+}
+\end{quote}
+\begin{quote}
+\textcolor{blue}{$$P(X=700)=0$$}
+\end{quote}
+\begin{quote}
+Referencias:
+\begin{itemize}
+\item Probabilidad y variables aleatorias, 7, "Variables aleatorias continuas", p.83
+\item Distribuciones de probablilidad e inferencia estadistica con R, 1.3.1, p.18
+\item Probabilidad y variables aleatorias, 8, "Distribucion normal", p.98
+\end{itemize}
+\end{quote}
+
+d) A partir de la media y la desviación típica del enunciado, genere una muestra aleatoria de 350 observaciones que represente los salarios mensuales de los empleados, asumiendo que la variable sigue una distribución normal; antes de la simulación utilice set.seed(2026) para garantizar la reproducibilidad de los resultados. A continuación, realice una comprobación visual de la distribución obtenida y analice si el comportamiento observado es coherente con la normalidad teórica. (1 punto).”
+\begin{quote}
+\textcolor{blue}{
+}
+\end{quote}
+``` {r 1d}
+set.seed(2026)
+salarios <- rnorm(350, mean = 700, sd = 40)
+
+ggplot(data.frame(salarios), aes(x = salarios)) +
+  geom_histogram(aes(y = after_stat(density)),
+                 bins = 20,
+                 fill = "lightblue",
+                 color = "black") +
+  geom_density(color = "blue", linewidth = 1)
+```
+\begin{quote}
+\textcolor{blue}{
+La distribución observada presenta una forma aproximadamente \textbf{simétrica y acampanada}, \textbf{sin desviaciones significativas}, lo que es coherente con el \textbf{comportamiento esperado de una distribución normal teórica}.
+}
+\end{quote}
+
+## Pregunta 2 (resolver con R). (3 puntos).
+
+Un empleado de la empresa está buscando otro trabajo, y tiene dos ofertas. En la empresa Medianamart le ofrecen un salario fijo mensual de 470 euros más un plus que puede modelizarse como una variable aleatoria uniforme con valores entre 0 y 650. En la otra empresa, Amazonas, le ofrecen un salario variable que puede verse como una variable aleatoria normal de media 800 euros y desviación típica de 180 euros.
+
+\begin{quote}
+\textcolor{blue}{
+\begin{itemize}
+\item Medianamart: $X = 470+U$, $U \sim Uniforme(0,650)$
+\item Amazonas: $Y \sim N(800,180)$
+\end{itemize}
+}
+\end{quote}
+a) Halla la esperanza y la varianza de los dos posibles salarios mensuales. Justifique la respuesta basándose en los apuntes de la asignatura, indicando la sesión y la página de los mismos. (1.5 puntos).
+
+``` {r 2a}
+E_medianamart <- 470 + (0 +650) / 2
+Var_medianamart <- (650 - 0)^2 / 12
+
+E_medianamart
+Var_medianamart
+
+E_amazonas <- 800
+Var_amazonas<- 180^2
+
+E_amazonas
+Var_amazonas
+```
+\begin{quote}
+\textcolor{blue}{
+Se utilizan las propiedades de la esperanza y la varianza de las distribuciones uniforme y normal, así como la propiedad de traslación de la esperanza y la varianza. En particular, para una variable uniforme $U(a,b)$, $E(U) = \frac{a+b}{2}$ y $Var(U) = \frac{(b-a)^2}{12}$, mientras que para una normal $N(\mu,\sigma)$, $E(X)=\mu$ y $Var(X)=\sigma^2$. Además, la suma de una constante afecta únicamente a la esperanza y no a la varianza.
+}
+\end{quote}
+\begin{quote}
+Referencias:
+\begin{itemize}
+\item Probabilidad y variables aleatorias, 8, "Distribución uniforme", p.94
+\item Probabilidad y variables aleatorias, 8, "Distribución exponencial", p.96
+\item Probabilidad y variables aleatorias, 8,
+"Distribución normal", p. 98
+\item Probabilidad y variables aleatorias, 5, "Algunas propiedades de la esperanza", p. 63
+\item Probabilidad y variables aleatorias, 5, "Algunas propiedades de la varianza", p. 63
+\end{itemize}
+\end{quote}
+
+b) Si decides elegir el trabajo que con más probabilidad te permita ganar más de 900 euros al mes, ¿qué trabajo debes elegir? Justifique la respuesta basándose en los apuntes/recursos de la asignatura. (1.5 puntos).
+
+\begin{quote}
+\textcolor{blue}{Se calcula la probabilidad de superar los 900 euros en ambas distribuciones. En el caso de la distribución uniforme, la probabilidad se obtiene como la proporción del intervalo favorable respecto al total. En el caso de la distribución normal, se utiliza la tipificación y la función de distribución acumulada. Comparando ambas probabilidades, se observa que la opción de \textbf{Medianamart presenta una mayor probabilidad de superar los 900 euros mensuales}.
+}
+\end{quote}
+``` {r 2b}
+p_medianamart_900 <- (1120 - 900) / (1120 - 470)
+p_medianamart_900
+
+p_amazonas_900 <- pnorm(900, mean = 800, sd = 180, lower.tail = FALSE)
+p_amazonas_900
+
+if (p_medianamart_900 > p_amazonas_900) {
+  mejor_opcion <- "Medianamart"
+} else {
+  mejor_opcion <- "Amazonas"
+}
+mejor_opcion
+
+set.seed(2026)
+
+# Simulate data
+medianamart <- 470 + runif(1000, 0, 650)
+amazonas <- rnorm(1000, mean = 800, sd = 180)
+
+library(ggplot2)
+
+# Combine into one dataset
+df <- data.frame(
+  salario = c(medianamart, amazonas),
+  empresa = rep(c("Medianamart", "Amazonas"), each = 1000)
+)
+
+# Plot
+ggplot(df, aes(x = salario, fill = empresa)) +
+  geom_histogram(alpha = 0.5, position = "identity", bins = 30) +
+  geom_vline(xintercept = 900, linetype = "dashed") +
+  labs(title = "Comparación de salarios simulados")
+```
+
+\begin{quote}
+Referencias:
+\begin{itemize}
+\item Probabilidad y variables aleatorias, 8, "Distribución uniforme", p.94
+\item Probabilidad y variables aleatorias, 8,
+"Distribución normal", pp.98-104
+\item Distribuciones de probabilidad e inferencia estadistica con R, 1.3.1, p.18
+\item Distribuciones de probabilidad e inferencia estadística con R, 1.3.3. p.21
+\end{itemize}
+\end{quote}
+## Pregunta 3 (resolver con R y crear vídeo). (3 puntos).
+
+La empresa desea implementar un plan de incentivos para mejorar la retención de sus empleados y evitar que se cambien a otras compañías como Medianamarkt o Amazonas. Como parte de este plan, se regalará a cada empleado una serie de artículos de uso personal o profesional.
+Se sabe, a partir de datos históricos, que la vida útil de estos artículos, medida como el tiempo hasta que dejan de ser funcionales, puede modelarse mediante una distribución exponencial con media de 6 años.
+
+**Además de resolver los apartados que se planteen, se deberá presentar un vídeo explicativo de la siguiente pregunta, en el que se muestre claramente cómo realiza el procedimiento en R, incluyendo la escritura y ejecución del código correspondiente. En el vídeo deberá explicar qué función utiliza, qué representan los parámetros empleados y cómo interpretar los resultados obtenidos desde el punto de vista estadístico. Se valorará tanto la correcta implementación técnica como la claridad en la explicación y la interpretación de los resultados. El vídeo deberá durar máximo 1 minuto.**
+
+a) ¿Cuál es la varianza de la vida útil de los artículos regalados? Justifique la respuesta basándose en los apuntes de la asignatura, indicando la sesión y la página de los mismos. (1 punto). 
+
+\begin{quote}
+\textcolor{blue}{
+Para una variable aleatoria con distribución exponencial de parámetro $\lambda$, se cumple que $E(X)=\frac{1}{\lambda}$ y $Var(X)=\frac{1}{\lambda^2}$. Dado que la media es 6, se tiene $\lambda = \frac{1}{6}$, por lo que la varianza es $Var(X)=36$.
+}
+\end{quote}
+``` {r 3a}
+lambda <- 1/6
+varianza_articulo <- 1/lambda^2
+varianza_articulo
+```
+\begin{quote}
+Referencias:
+\begin{itemize}
+\item Probabilidad y variables aleatorias, 8, "Distribución exponencial", p. 96
+\item Distribuciones de probabilidad e inferencia estadistica con R, 1.3.2, p.19
+\end{itemize}
+\end{quote}
+b) ¿Cuál es la probabilidad de que un artículo dure más de cuatro años? (1 punto).
+
+``` {r 3b}
+pexp(4, rate = 1/6, lower.tail = FALSE)
+```
+\begin{quote}
+\textcolor{blue}{
+$$P(X > 4) = e^{-\lambda \cdot 4} = e^{-2/3} \approx 0.5134$$
+}
+\end{quote}
+
+c) ¿Cuál es la probabilidad de que un artículo que haya durado 5 años, dure 4 años más? ¿Qué se puede decir del resultado? Justifique la respuesta. (1 punto).
+
+\begin{quote}
+\textcolor{blue}{
+Queremos $P(X>9 \lvert X>5)$
+}
+\end{quote}
+\begin{quote}
+\textcolor{blue}{
+La distribución exponencial cumple la propiedad sin memoria, por la cual $P(X > s + t \mid X > s) = P(X > t)$. Por tanto, la probabilidad de que un artículo que ya ha durado 5 años dure 4 años más es igual a la probabilidad de que dure más de 4 años desde el inicio. Esto implica que el tiempo ya transcurrido no afecta a la probabilidad futura.
+}
+\end{quote}
+\begin{quote}
+\textcolor{blue}{
+También puede comprobarse en R que:
+}
+\end{quote}
+``` {r 3c}
+p_condicional <- pexp(9, rate = lambda, lower.tail = FALSE) /
+  pexp(5, rate = lambda, lower.tail = FALSE)
+
+p_sin_mem <- pexp(4, rate = lambda, lower.tail = FALSE)
+
+p_condicional
+p_sin_mem
+```
+\begin{quote}
+\textcolor{blue}{
+El resultado muestra que \textbf{el pasado no influye en el futuro}, característica propia de la distribución exponencial conocida como propiedad sin memoria.
+}
+\end{quote}
+\begin{quote}
+Referencias:
+\begin{itemize}
+\item Probabilidad y variables aleatorias, 8, "Distribucion exponencial", p.96
+\item Distribuciones de probabilidad e inferencia estadistica con R, 1.3.2, p.19
+\end{itemize}
+\end{quote}

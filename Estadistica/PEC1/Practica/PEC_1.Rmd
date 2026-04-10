@@ -12,7 +12,7 @@ library("knitr")
 library("ggplot2")
 ```
 
-### NOMBRE:
+### NOMBRE: Ivan Miranda Moral
 
 Indique claramente el nombre y apellidos en la primera página del informe. Resuelva los ejercicios utilizando R siempre que sea necesario; es importante mostrar cada uno de los pasos realizados para llegar al resultado final. Indique en cada caso qué instrucciones de R ha utilizado y las salidas que se obtienen.
 
@@ -52,18 +52,35 @@ Una agencia ambiental quiere evaluar la eficiencia de los municipios.
   a) Describa el tipo de cada variable (Nominal, Ordinal, Discreta o Continua). Justifique la respuesta basándose en los apuntes de la asignatura.
   
 ```{r 1a}
-#Espacio para la solución
+# Municipio_ID: NOMINAL,
+#   aunque los valores son numéricos, no tienen significado numerico ni orden.
+# Habitantes: DISCRETA,
+#   es una variable cuantitativa que solo se puede tomar con numeros enteros.
+# Tipo_Municipio: NOMINAL,
+#   clasifica el tipo de municipio pero sin un orden entre ellos.
+# Residuos_kg_capita: CONTINUA,
+#   es una variable numérica que puede tomar valores reales dentro de un
+#   intervalo.
+# Tasa_Reciclaje: CONTINUA,
+#   es una variable numérica que representa un porcentaje, es decir, valores
+#   reales dentro de un rango.
+# Coste_Gestion_EUR: CONTINUA,
+#   es una variable numéria que puede tomar valores reales.
+# Puerta_a_Puerta: NOMINAL,
+#   indica si un municipio tiene implementado un sistema puerta a puerta, es una
+#   categoria sin orden natural.
 ```
 
   b) Calcule un resumen numérico completo (media, mediana, cuartiles y desviación típica) de la variable Tasa_Reciclaje. ¿Qué nos indica la diferencia entre la media y la mediana sobre la simetría de los datos?
   
 ```{r 1b}
 tr_sumario <- sostenibles %>%
-                summarize(media = mean(Tasa_Reciclaje),
-                          mediana = median(Tasa_Reciclaje),
+                    summarize(min = min(Tasa_Reciclaje),
                           Q1 = quantile(Tasa_Reciclaje, prob = .25),
-                          Q2 = quantile(Tasa_Reciclaje, prob = .50),
+                          media = mean(Tasa_Reciclaje),
+                          mediana = median(Tasa_Reciclaje),
                           Q3 = quantile(Tasa_Reciclaje, prob = .75),
+                          max = max(Tasa_Reciclaje),
                           desviacion_tipica = sd(Tasa_Reciclaje))
 kable(tr_sumario, caption = "Sumario de Tasa_Reciclaje")
 ```
@@ -71,15 +88,31 @@ kable(tr_sumario, caption = "Sumario de Tasa_Reciclaje")
   c) Cree una nueva variable denominada Eficiencia_Coste que sea el resultado de dividir la Tasa_Reciclaje entre el Coste_Gestion_EUR. Presente las primeras 5 filas de la nueva variable.
   
 ```{r 1c}
-Eficiencia_Coste <- sostenibles$Tasa_Reciclaje / sostenibles$Coste_Gestion_EUR
+Eficiencia_Coste <- data.frame(eficiencia_coste = sostenibles$Tasa_Reciclaje / sostenibles$Coste_Gestion_EUR)
 
-kable(Eficiencia_Coste[1:5], caption = "Eficiencia Coste de las primeras 5 filas")
+kable(head(Eficiencia_Coste, n = 5),
+      caption = "Eficiencia Coste de las primeras 5 filas")
 ```
 
   d) Realice una descripción estadística de la variable cualitativa Tipo_Municipio. Calcule la tabla de frecuencias absolutas y frecuencias relativas, y represente la distribución de los datos mediante un gráfico de sectores. ¿Qué categoría de municipio es la más frecuente en la muestra?
   
 ```{r 1d}
-#Espacio para la solución
+# La tabla de frecuencias muestra la distribución de la variable cualitativa
+# nominal Tipo_Municipio, que clasifica los distintos municipios por categorias
+# (Rural, Turistico y Urbano) sin un orden predeterminado.
+# La categoría más frecuente en el conjunto de datos es "Urbano", ya que
+# presenta la mayor frecuencia absoluta y relativa.
+
+frecuencias <- sostenibles %>%
+                count(Tipo_Municipio, name = "ni") %>%
+                mutate(fi = ni / sum(ni))
+
+kable(frecuencias, caption = "Distribución de Tipo_Municipio")
+
+setNames(object = frecuencias$fi, c("Rural", "Turístico", "Urbano")) %>%
+  pie(col = cm.colors(length(frecuencias$fi)))
+labels <- paste(round(frecuencias$ni/sum(frecuencias$ni) * 100, 1), "%")
+legend("topright", legend = labels, fill = cm.colors(length(frecuencias$fi)))
 ```
 
 ## Problema 2
@@ -89,28 +122,129 @@ kable(Eficiencia_Coste[1:5], caption = "Eficiencia Coste de las primeras 5 filas
   a) Realice un diagrama de cajas (boxplot) de la Tasa_Reciclaje según si el municipio utiliza el sistema Puerta_a_Puerta. Comente las diferencias observadas en la dispersión y en los valores centrales.
   
 ```{r 2a}
+# El boxplot de Tasa_Reciclaje según Puerta_a_Puerta muestra que los municipios
+# sin este sistema presentan una dispersión mayor que los que sí lo usan.
+# La mediana también es ligeramente superior en el grupo “No” (41.4 %) respecto
+# al grupo “Sí” (39.2 %), aunque la diferencia en los valores centrales
+# no es grande.
+
 ggplot(sostenibles, aes(x = Puerta_a_Puerta, y = Tasa_Reciclaje)) +
-  geom_boxplot()
+  stat_boxplot(geom = "errorbar", width = 0.2) +
+  geom_boxplot() +
+  labs(title = "Tasa_Reciclaje según Puerta_a_Puerta")
 ```
 
   b) Si un municipio presenta una tasa de reciclaje del 90 %, ¿lo consideraría un “outlier”? Razone la respuesta según el concepto de datos atípicos de los apuntes. 
-   
+  
 ```{r 2b}
-#Espacio para la solución
-```
+# SI, una tasa de reciclaje del 90% lo consideraría un "outlier" porque es un
+# dato atípico que se sale del limite superior. 
+# Este caso se contrasta usando la siguiente formula:
+#                           Q3 + 1.5 * IQR
+# En este caso el limite superior es 72.5625, entonces 90 sería considerado 
+# un "outlier."
 
+tr_outlier <- sostenibles %>%
+        summarize(limite_inferior = quantile(
+                      Tasa_Reciclaje, prob = 0.25) - 1.5 * IQR(Tasa_Reciclaje),
+                  min = min(Tasa_Reciclaje),
+                  Q1 = quantile(Tasa_Reciclaje, prob = 0.25),
+                  mediana = median(Tasa_Reciclaje),
+                  Q3 = quantile(Tasa_Reciclaje, prob = 0.75),
+                  max = max(Tasa_Reciclaje),
+                  limite_superior = quantile(
+                      Tasa_Reciclaje, prob = 0.75) + 1.5 * IQR(Tasa_Reciclaje),
+                  IQR = IQR(Tasa_Reciclaje))
+
+kable(tr_outlier, caption = "Datos tipicos de Tasa_Reciclaje")
+
+# ADEMÁS,
+# en ambos casos de puerta a puerta, una tasa de reciclaje del 90% se
+# consideraría un "outlier" porque sale del limite superior.
+# Estos limites se ven marcados en el boxplot anterior.
+
+pap_outlier <- sostenibles %>%
+        group_by(Puerta_a_Puerta) %>%
+        summarize(limite_inferior = quantile(
+                      Tasa_Reciclaje, prob = 0.25) - 1.5 * IQR(Tasa_Reciclaje),
+                  min = min(Tasa_Reciclaje),
+                  Q1 = quantile(Tasa_Reciclaje, prob = 0.25),
+                  mediana = median(Tasa_Reciclaje),
+                  Q3 = quantile(Tasa_Reciclaje, prob = 0.75),
+                  max = max(Tasa_Reciclaje),
+                  limite_superior = quantile(
+                      Tasa_Reciclaje, prob = 0.75) + 1.5 * IQR(Tasa_Reciclaje),
+                  IQR = IQR(Tasa_Reciclaje))
+
+kable(pap_outlier,
+      caption = "Datos tipicos de Tasa_Reciclaje según Puerta_a_Puerta")
+```
 ## Problema 3
 
 (3 puntos) Se quiere realizar una encuesta detallada a 15 municipios para conocer la opinión de la ciudadanía.
 
   a) Explique cómo aplicaría un muestreo estratificado para asegurar que los tres tipos de municipios (Rural, Urbano, Turístico) estén representados proporcionalmente. Cite en qué parte de los apuntes ha encontrado cómo hacerlo.
  
-```{r 3a} 
-#Espacio para la solución
+```{r 3a}
+# En este contexto, para llevar acabo un muestreo estratificado seguiría los
+# siguientes pasos:
+#   1) Dividir la población en estratos en función de la variable Tipo_Muncipio
+#       (Rural, Urbano, Turístico) en grupos homogéneos.
+#   2) Calcular el peso de cada estrato en la población, es decir, determinar
+#       qué proporción de la población total corresponde a cada tipo de
+#       municipio.
+#   3) Determinar el tamaño de la muestra en cada estrato. Partiendo de la
+#       muestra total de 15 municipios, se asigna a cada estrato un número
+#       de municipios proporcional a su peso en la población.
+#   4) Seleccionar aleatoriamente los municipios hasta completar el número
+#       asignado a cada estrato.
+
+# Esto se puede implementar en R, de la siguiente manera:
+
+n <- 15
+estrat <- frecuencias %>%
+            mutate(muestra = round(fi * n))
+
+kable(estrat, caption = "Muestreo estratificado")
+
+muestreo_estratificado <- function(data, filter_cat, cat_type, n) {
+    data %>%
+      filter(filter_cat == cat_type) %>%
+        sample_n(size = n)
+}
+
+seis_urbanos <- muestreo_estratificado(sostenibles, 
+                                       sostenibles$Tipo_Municipio,
+                                       "Urbano",
+                                       estrat$muestra[3]) %>%
+                                          select(Tipo_Municipio, Municipio_ID)
+
+cinco_turisticos <- muestreo_estratificado(sostenibles, 
+                                       sostenibles$Tipo_Municipio,
+                                       "Turístico",
+                                       estrat$muestra[2]) %>%
+                                          select(Tipo_Municipio, Municipio_ID)
+
+cuatro_rurales <- muestreo_estratificado(sostenibles, 
+                                       sostenibles$Tipo_Municipio,
+                                       "Rural",
+                                       estrat$muestra[1]) %>%
+                                          select(Tipo_Municipio, Municipio_ID)
+
+kable(rbind(cuatro_rurales, cinco_turisticos, seis_urbanos), 
+      caption = "Municipios Aleatorizados") 
+
+#   Referencia: Gil Estallo, A. J. (2019). Muestreo. apartado 5. Muestreo 
+#       estratificado, pag. 11-13.
 ```
 
 b) ¿Por qué en este contexto sería mejor un muestreo estratificado que un muestreo aleatorio simple? Justifique la respuesta basándose en la representatividad de la muestra.
 
 ```{r 3b}
-#Espacio para la solución
+# El muestreo estratificado garantiza que todos los tipos de municipios estén
+# debidamente representados en la muestra. En el caso de utilizar un muestreo
+# aleatorio simple, podría pasar que alguna de las categorias de municipios 
+# estuviese muy poco representada. Por ello, el muestreo estratificado asegura
+# la representatividad de la muestra respecto a la estructura real de la 
+# población.
 ```
