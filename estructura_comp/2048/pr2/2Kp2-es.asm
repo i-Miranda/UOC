@@ -352,6 +352,7 @@ updateBoardP2:
    ;guardamos el estado de los registros del procesador porque
    ;las funciones de C no mantienen el estado de los registros.
    push rdx
+   push rcx
    push rbx            ; rbx = m
    push r12            ; r12d = rowScreenAux
    push r13            ; r13d = i
@@ -414,6 +415,7 @@ updateBoardP2:
 	   pop r13
 	   pop r12
 	   pop rbx
+	   pop rcx
 	   pop rdx
 	
 	   mov rsp, rbp
@@ -543,6 +545,7 @@ rotateMatrixLRP2:
    push r14
    push r15
    push rsi			; save dir
+   push rcx
 
    mov r14, rdi		; r14 = mToRotate
    mov r15, rbx		; r15 = mRotated local base address
@@ -601,6 +604,7 @@ rotateMatrixLRP2:
 		call copyMatrixP2
    rm_end:
    ;restaurar el estado de los registros que se han guardado en la pila.
+   pop rcx
    pop rsi
    pop r15
    pop r14
@@ -889,6 +893,7 @@ checkEndP2:
 	push r13
 	push r14
 	push r15
+	push rcx
    
   	mov r12, rdi				; r12 = m 
   	mov r13, rsi				; r13 = mAux
@@ -967,6 +972,7 @@ checkEndP2:
 
    che_end:
    ;restaurar el estado de los registros que se han guardado en la pila.
+   pop rcx
    pop r15
    pop r14
    pop r13
