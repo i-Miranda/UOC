@@ -447,6 +447,7 @@ copyMatrixP2:
    mov  rbp, rsp
    ;guardamos el estado de los registros del procesador porque
    ;las funciones de C no mantienen el estado de los registros.
+   push rdx
    push r12
    push r13
    push r14 
@@ -482,6 +483,7 @@ copyMatrixP2:
    pop r14
    pop r13
    pop r12
+   pop rdx
    
    mov rsp, rbp
    pop rbp
@@ -535,6 +537,7 @@ rotateMatrixLRP2:
    
    ;guardamos el estado de los registros del procesador porque
    ;las funciones de C no mantienen el estado de los registros.
+   push rdx
    push r12
    push r13
    push r14
@@ -603,6 +606,7 @@ rotateMatrixLRP2:
    pop r14
    pop r13
    pop r12
+   pop rdx
    
    pop rbx
    
@@ -646,6 +650,7 @@ shiftNumbersLP2:
    mov  rbp, rsp
    ;guardamos el estado de los registros del procesador porque
    ;las funciones de C no mantienen el estado de los registros.
+   push rdx
    push rbx
    push r12
    push r13
@@ -728,6 +733,7 @@ shiftNumbersLP2:
    pop r13
    pop r12
    pop rbx
+   pop rdx
    
    mov rsp, rbp
    pop rbp
@@ -769,6 +775,7 @@ addPairsLP2:
    mov  rbp, rsp
    ;guardamos el estado de los registros del procesador porque
    ;las funciones de C no mantienen el estado de los registros.
+   push rdx
    push rbx
    push r12
    push r13
@@ -831,6 +838,7 @@ addPairsLP2:
    pop r13
    pop r12
    pop rbx
+   pop rdx
    
    mov rsp, rbp
    pop rbp
