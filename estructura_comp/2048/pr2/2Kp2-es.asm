@@ -276,12 +276,14 @@ showNumberP2:
    jl sn_num_zero
    cmp rax, 999999
    jg sn_num_999999
-   jmp sn_for
+   jmp sn_init_for
    sn_num_zero:
 		xor rax, rax
-		jmp sn_for
+		jmp sn_init_for
    sn_num_999999:
 		mov rax, 999999
+   sn_init_for:
+		xor rcx, rcx				; i = 0
    ; --------------FOR LOOP-------------
    sn_for:
 		cmp rcx, 6					; while (i) < 6
@@ -540,7 +542,7 @@ rotateMatrixLRP2:
    push rsi			; save dir
 
    mov r14, rdi		; r14 = mToRotate
-   mov r15, rsp		; r15 = mRotated local base address
+   mov r15, rbx		; r15 = mRotated local base address
    
    xor r12d, r12d				; i = 0
    rm_for:
@@ -766,14 +768,14 @@ addPairsLP2:
    mov  rbp, rsp
    ;guardamos el estado de los registros del procesador porque
    ;las funciones de C no mantienen el estado de los registros.
-   push rdx
+   push rbx
    push r12
    push r13
    push r14
    push r15
    
    mov r15, rdi							; r15 = mPairs
-   xor ecx, ecx							; p = 0
+   xor r14d, r14d							; p = 0
 
    xor r12d, r12d						; i = 0
    ap_for:
@@ -824,9 +826,6 @@ addPairsLP2:
 		jle ap_end
 
 		mov eax, r14d
-		cdqe
-		add r10, rax
-		mov r8w, 2
    ap_end:                         ;return p;
    ;restaurar el estado de los registros que se han guardado en la pila.
    pop r15
@@ -909,7 +908,7 @@ checkEndP2:
 		inc r15d
    che_check_2048:
 		; if (m[i][j] == 2048) state = 4
-		cmp dword [r12 + rax * 4], 0
+		cmp dword [r12 + rax * 4], 2048
 		jne che_continue_j
 		mov r14w, 4
    che_continue_j:
