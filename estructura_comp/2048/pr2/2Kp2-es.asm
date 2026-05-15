@@ -349,53 +349,62 @@ updateBoardP2:
    mov  rbp, rsp
    ;guardamos el estado de los registros del procesador porque
    ;las funciones de C no mantienen el estado de los registros.
-   push rbx			; m
-   push r12			; r12d = rowScreenAux
-   push r13			; r13d = i
-   push r14			; r14d = colScreenAux
-   push r15			; r15d = j
-   push rsi         ; save score
 
-   mov rbx, rdi		; m
+   push rbx            ; rbx = m
+   push r12            ; r12d = rowScreenAux
+   push r13            ; r13d = i
+   push r14            ; r14d = colScreenAux
+   push r15            ; r15d = j
+   push rsi            ; save score
 
-   mov r12d, 10		; rowScreenAux = 10;
-   xor r13d, r13d	; i = 0;
-   ub_for:
-		cmp r13d, DIMMATRIX
-		jge ub_end
-		mov r14d, 17							;colScreenAux = 17
-		xor r15d, r15d							;j = 0
-		ub_inner_for:
-			cmp r15d, DIMMATRIX
-			jge ub_for_inc
+   mov rbx, rdi        ; rbx = m
 
-			mov eax, r13d
-			imul eax, DIMMATRIX
-			add eax, r15d
-			cdqe								; expand index to 64 bits
+   mov r12d, 10        ; rowScreenAux = 10
+   xor r13d, r13d      ; i = 0
 
-			mov eax, dword [m + rax * 4]
-			mov qword [number], rax
+ub_for:
+   cmp r13d, DIMMATRIX
+   jge ub_show_score
 
-			mov edi, r12d
-			mov esi, r14d
-			call showNumberP2
+   mov r14d, 17        ; colScreenAux = 17
+   xor r15d, r15d      ; j = 0
 
-			add r14d, 9							; next cell in same row
-			inc r15d
-			jmp ub_inner_for
-   ub_for_inc:
-		add r12d, 2
-		inc r13d
-		jmp ub_for
-   ub_end:
-		mov edi, 18
-		mov esi, 35
-   		call showNumberP2
+ub_inner_for:
+   cmp r15d, DIMMATRIX
+   jge ub_for_inc
 
-		mov rdi, 18
-		mov rsi, 36
-   		call gotoxyP2
+   mov eax, r13d
+   imul eax, DIMMATRIX
+   add eax, r15d
+   cdqe
+
+   movsxd rdx, dword [rbx + rax*4]   ; rdx = (long)m[i][j]
+
+   mov edi, r12d       ; rowScreenAux
+   mov esi, r14d       ; colScreenAux
+   call showNumberP2
+
+   add r14d, 9
+   inc r15d
+   jmp ub_inner_for
+
+ub_for_inc:
+   add r12d, 2
+   inc r13d
+   jmp ub_for
+
+ub_show_score:
+   pop rdx             ; rdx = saved score
+
+   mov edi, 18
+   mov esi, 35
+   call showNumberP2
+
+   mov edi, 18
+   mov esi, 36
+   call gotoxyP2
+
+ub_end:
    ;restaurar el estado de los registros que se han guardado en la pila.
 
    ;no pop rsi so we don't lose the score
@@ -408,8 +417,6 @@ updateBoardP2:
    mov rsp, rbp
    pop rbp
    ret
-
-
 ;;;;;  
 ; Copiar la matriz origen (mOrigin) -segundo parámetro- sobre la matriz
 ; destino (mDest) -primer parámetro-.
