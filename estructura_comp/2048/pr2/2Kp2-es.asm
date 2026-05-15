@@ -263,20 +263,55 @@ showNumberP2:
    mov  rbp, rsp
    ;guardamos el estado de los registros del procesador porque
    ;las funciones de C no mantienen el estado de los registros.
-	push rdi ;rowScreen
-	push rsi ;colScreen
-	push rdx ;num
+   push rbx
+   push r12
+   push r13
+   push r14
 
-	mov rax, rdx;
-	
-  
-  
-  
+   mov rax, rdx		;num	
+   mov r12d, edi	;rowScreen
+   mov r13d, esi	;colScreen
+
+   cmp rax, 0
+   jl sn_num_zero
+   cmp rax, 999999
+   jg sn_num_999999
+   jmp sn_for
+   sn_num_zero:
+		xor rax, rax
+		jmp sn_for
+   sn_num_999999:
+		mov rax, 999999
+   ; --------------FOR LOOP-------------
+   sn_for:
+		cmp rcx, 6					; while (i) < 6
+		jge sn_end
+		mov r14b, 32				; ' ' ascii code
+		cmp rax, 0 					; this if keeps numbers right-aligned
+		jle sn_for_zero
+
+		xor rdx, rdx
+		mov rbx, 10					; decimal base
+		div rbx						; rax is the quotient, rdx is the remainder
+		add dl, 48 					; converts digit to ASCII
+		mov r14b, dl
+   sn_for_zero: 
+		mov edi, r12d				; rowScreen
+		mov esi, r13d				; colScreen
+		call gotoxyP2
+
+		mov dil, r14b				; charac is a char
+		call printchP2
+
+		dec r13d					; next left digit
+		inc rcx
+		jmp sn_for
    sn_end:
    ;restaurar el estado de los registros que se han guardado en la pila.
-   pop rdx
-   pop rsi
-   pop rdi
+   pop r14
+   pop r13
+   pop r12
+   pop rbx
 
    mov rsp, rbp
    pop rbp
@@ -314,15 +349,61 @@ updateBoardP2:
    mov  rbp, rsp
    ;guardamos el estado de los registros del procesador porque
    ;las funciones de C no mantienen el estado de los registros.
-   push rdi ;m 
-   push rsi ;score
-   
-   
-   
+   push rbx			; m
+   push r12			; r12d = rowScreenAux
+   push r13			; r13d = i
+   push r14			; r14d = colScreenAux
+   push r15			; r15d = j
+   push rsi         ; save score
+
+   mov rbx, rdi		; m
+
+   mov r12d, 10		; rowScreenAux = 10;
+   xor r13d, r13d	; i = 0;
+   ub_for:
+		cmp r13d, DIMMATRIX
+		jge ub_end
+		mov r14d, 17							;colScreenAux = 17
+		xor r15d, r15d							;j = 0
+		ub_inner_for:
+			cmp r15d, DIMMATRIX
+			jge ub_for_inc
+
+			mov eax, r13d
+			imul eax, DIMMATRIX
+			add eax, r15d
+			cdqe								; expand index to 64 bits
+
+			mov eax, dword [m + rax * 4]
+			mov qword [number], rax
+
+			mov edi, r12d
+			mov esi, r14d
+			call showNumberP2
+
+			add r14d, 9							; next cell in same row
+			inc r15d
+			jmp ub_inner_for
+   ub_for_inc:
+		add r12d, 2
+		inc r13d
+		jmp ub_for
    ub_end:
+		mov edi, 18
+		mov esi, 35
+   		call showNumberP2
+
+		mov rdi, 18
+		mov rsi, 36
+   		call gotoxyP2
    ;restaurar el estado de los registros que se han guardado en la pila.
-   pop rsi
-   pop rdi
+
+   ;no pop rsi so we don't lose the score
+   pop r15
+   pop r14
+   pop r13
+   pop r12
+   pop rbx
 
    mov rsp, rbp
    pop rbp
@@ -357,15 +438,41 @@ copyMatrixP2:
    mov  rbp, rsp
    ;guardamos el estado de los registros del procesador porque
    ;las funciones de C no mantienen el estado de los registros.
-   push rdi ;mDest
-   push rsi ;mOrigin
+   push r12
+   push r13
+   push r14 
+   push r15
+
+   mov r14, rdi 		; r14 = mDest
+   mov r15, rsi			; r15 = mOrigin
    
-   
-   
+   xor r12d, r12d		; i = 0
+   cm_for:
+		cmp r12d, DIMMATRIX
+		jge cm_end
+   		xor r13d, r13d ; j = 0
+		cm_inner_for:
+			cmp r13d, DIMMATRIX
+			jge cm_for_inc
+
+			mov eax, r12d
+			imul eax, DIMMATRIX
+			add eax, r13d
+
+			mov edx, dword [r15 + rax * 4]
+			mov dword [r14 + rax * 4], edx
+
+			inc r13d
+			jmp cm_inner_for
+   cm_for_inc:
+   		inc r12d
+		jmp cm_for
    cm_end:
    ;restaurar el estado de los registros que se han guardado en la pila.
-   pop rsi
-   pop rdi
+   pop r15
+   pop r14
+   pop r13
+   pop r12
    
    mov rsp, rbp
    pop rbp
@@ -419,16 +526,74 @@ rotateMatrixLRP2:
    
    ;guardamos el estado de los registros del procesador porque
    ;las funciones de C no mantienen el estado de los registros.
-   push rdi ; mToRotate
-   push rsi ; dir
+   push r12
+   push r13
+   push r14
+   push r15
+   push rsi			; save dir
+
+   mov r14, rdi		; r14 = mToRotate
+   mov r15, rsp		; r15 = mRotated local base address
    
-   
-   
-   
+   xor r12d, r12d				; i = 0
+   rm_for:
+		cmp r12d, DIMMATRIX 
+		jge rm_copy
+   		xor r13d, r13d			; j = 0
+   		rm_inner_for:
+			cmp r13d, DIMMATRIX 
+			jge rm_for_inc
+  
+			mov eax, r12d
+			imul eax, DIMMATRIX
+			add eax, r13d
+			mov edx, dword [r14 + rax * 4]
+
+			cmp sil, 76 ; 'L' ascii code
+			jne rm_check_r
+
+			; dest row = DIMMATRIX-i-j 
+			mov ebx, DIMMATRIX
+			dec ebx
+			sub ebx, r13d
+			
+			mov ecx, ebx
+			imul ecx, DIMMATRIX
+			add ecx, r12d
+
+			mov dword [r15 + rcx * 4], edx
+			jmp rm_inner_for_inc
+			rm_check_r:
+				cmp sil, 82				; 'R' ascii code
+				jne rm_inner_for_inc
+				
+				; dest row = j 
+				mov ebx, DIMMATRIX
+				dec ebx
+				sub ebx, r12d 			; ebx = DIMMATRIX-1-i
+
+				mov ecx, r13d
+				imul ecx, DIMMATRIX
+				add ecx, ebx			; ecx = dest index
+
+				mov dword [r15 + rcx * 4], edx
+		rm_inner_for_inc:
+			inc r13d
+			jmp rm_inner_for
+   rm_for_inc:
+		inc r12d
+		jmp rm_for
+   rm_copy:
+		mov rdi, r14
+		mov rsi, r15
+		call copyMatrixP2
    rm_end:
    ;restaurar el estado de los registros que se han guardado en la pila.
-   pop rdi
    pop rsi
+   pop r15
+   pop r14
+   pop r13
+   pop r12
    
    pop rbx
    
@@ -472,14 +637,87 @@ shiftNumbersLP2:
    mov  rbp, rsp
    ;guardamos el estado de los registros del procesador porque
    ;las funciones de C no mantienen el estado de los registros.
-   push rdi ; mShift
-   push rax ; shifts
+   push rbx
+   push r12
+   push r13
+   push r14
+   push r15
    
-   
+   mov rbx, rdi					; rbx = mShift
+   xor rcx, rcx					;  shifts = 0
+
+   xor r12d, r12d				; i = 0
+   shn_for:
+		cmp r12d, DIMMATRIX
+		jge shn_end
+		
+		xor r13d, r13d			; j = 0
+		shn_inner_for:
+			mov eax, DIMMATRIX
+			dec eax
+			cmp r13d, eax
+			jge shn_for_inc
+
+			;cmp m[i][j], 0
+			mov eax, r12d
+			imul eax, DIMMATRIX
+			add eax, r13d
+			mov edx, dword [rbx + rax * 4]
+			cmp edx, 0
+			jne shn_inner_for_inc
+
+			mov r14d, r13d
+			inc r14d			; k = j + 1
+			shn_while:						;increment k while true
+				cmp r14d, DIMMATRIX
+				jge shn_inner_for_inc
+
+				;cmp m[i][j], 0
+				mov eax, r12d
+				imul eax, DIMMATRIX
+				add eax, r14d
+				mov edx, dword [rbx + rax * 4]
+				cmp edx, 0
+				jne shn_after_while
+
+				inc r14d
+				jmp shn_while
+
+			shn_after_while:
+				cmp r14d, DIMMATRIX
+				jge shn_inner_for_inc
+
+				;mov m[i][j], m[i][k]
+				mov eax, r12d
+				imul eax, DIMMATRIX
+				add eax, r14d
+				mov edx, dword [rbx + rax * 4]
+
+				mov eax, r12d
+				imul eax, DIMMATRIX
+				add eax, r13d
+				mov dword [rbx + rax * 4], edx
+
+				;mov m[i][k] = 0
+				mov eax, r12d
+				imul eax, DIMMATRIX
+				add eax, r14d
+				mov dword [rbx + rax * 4], 0
+
+				inc ecx
+		shn_inner_for_inc:
+			inc r13d
+			jmp shn_inner_for
+   shn_for_inc:
+   		inc r12d
+		jmp shn_for
    shn_end:                    
+   mov eax, ecx
    ;restaurar el estado de los registros que se han guardado en la pila.    
-   pop rax
-   pop rdi
+   pop r14
+   pop r13
+   pop r12
+   pop rbx
    
    mov rsp, rbp
    pop rbp
@@ -521,14 +759,74 @@ addPairsLP2:
    mov  rbp, rsp
    ;guardamos el estado de los registros del procesador porque
    ;las funciones de C no mantienen el estado de los registros.
-   push rdi ; mPairs
-   push rax ; p
+   push rdx
+   push r12
+   push r13
+   push r14
+   push r15
    
-   
+   mov r15, rdi							; r15 = mPairs
+   xor ecx, ecx							; p = 0
+
+   xor r12d, r12d						; i = 0
+   ap_for:
+   		cmp r12d, DIMMATRIX
+		jge ap_after_for
+		xor r13d, r13d					; j = 0
+		ap_inner_for:
+			mov eax, DIMMATRIX
+			dec eax
+			cmp r13d, eax
+			jge ap_for_inc
+
+			; load m[i][j]
+			mov eax, r12d
+			imul eax, DIMMATRIX
+			add eax, r13d
+
+			mov edx, dword [r15 + rax * 4]
+			cmp edx, 0
+			je ap_inner_for_inc
+
+			mov ecx, eax
+			inc ecx						; index of mPairs[i][j+1]
+
+			mov ebx, dword [r15 + rcx * 4]
+			cmp edx, ebx
+			jne ap_inner_for_inc	
+
+			;mov m[i][j], m[i][j] * 2
+			add edx, edx 						; times 2
+			mov dword [r15 + rax * 4], edx
+
+			;mov m[i][j + 1], 0
+			mov dword [r15 + rcx * 4], 0
+
+			;p += m[i][j]
+			add r14d, edx
+			inc r13d
+			
+		ap_inner_for_inc:
+  			inc r13d
+			jmp ap_inner_for
+   ap_for_inc:
+   		inc r12d
+		jmp ap_for
+   ap_after_for:
+   		cmp r14d, 0
+		jle ap_end
+
+		mov eax, r14d
+		cdqe
+		add qword [score], rax
+		mov word [state], 2
    ap_end:                         ;return p;
    ;restaurar el estado de los registros que se han guardado en la pila.
-   pop rax
-   pop rdi
+   pop r15
+   pop r14
+   pop r13
+   pop r12
+   pop rbx
    
    mov rsp, rbp
    pop rbp
@@ -574,17 +872,94 @@ checkEndP2:
    mov  rbp, rsp
    ;guardamos el estado de los registros del procesador porque
    ;las funciones de C no mantienen el estado de los registros.
-   push rdi ; m
-   push rsi ; mAux
-   push rdx ; state
+	push rbx
+	push r12
+	push r13
+	push r14
+	push r15
    
+  	mov r12, rdi				; r12 = m 
+  	mov r13, rsi				; r13 = mAux
+	mov r14w, dx 				; r14w = state (short)
+	xor r15d, r15d				; zeros = 0
    
-   
+	mov ebx, DIMMATRIX			; i = DIMMATRIX
+   che_do_i:
+		dec ebx					; i--
+		
+		mov ecx, DIMMATRIX		; j = DIMMATRIX
+   che_do_j:
+		dec ecx					; j--
+
+		; index = i * DIMMATRIX + j
+		mov eax, ebx
+		imul eax, DIMMATRIX
+		add eax, ecx
+
+		; if (m[i][j] == 0) zeros++
+		cmp dword [r12 + rax * 4], 0
+		jne che_check_2048
+		inc r15d
+   che_check_2048:
+		; if (m[i][j] == 2048) state = 4
+		cmp dword [r12 + rax * 4], 0
+		jne che_continue_j
+		mov r14w, 4
+   che_continue_j:
+		; while ((j>0) && (m[i][j]!=2048))
+		cmp ecx, 0
+		jle che_continue_i
+		cmp dword [r12 + rax * 4], 2048
+		jne che_do_j
+   che_continue_i:
+		; while ((i>0) && (m[i][j]!=2048))
+		cmp ebx, 0
+		jle che_after_scan
+		cmp dword [r12 + rax * 4], 2048
+		jne che_do_i
+   che_after_scan:
+		; if ((state != 4) && (zeros == 0))
+		cmp r14w, 4
+		je che_return
+
+		cmp r15d, 0
+		jne che_return
+
+		; copyMatrixP2(mAux, m)
+		mov rdi, r13
+		mov rsi, r12
+		call copyMatrixP2
+
+		; pairs = addPairsLP2(mAux)
+		mov rdi, r13
+		call addPairsLP2
+		mov ebx, eax			; ebx = pairs
+
+		; rotateMatrixLRP2(mAux, 'R')
+		mov rdi, r13
+		mov sil, 'R'
+		call rotateMatrixLRP2
+
+		; pairs += addPairsLP2(mAux)
+		mov rdi, r13
+		call addPairsLP2
+		add ebx, eax			; ebx = pairs
+
+		; if (pairs == 0) state = 5
+		cmp ebx, 0
+		jne che_return
+		mov r14w, 5
+
+   che_return:
+		mov ax, r14w			; return state
+
    che_end:
    ;restaurar el estado de los registros que se han guardado en la pila.
-   pop rdx
-   pop rsi
-   pop rdi
+   pop r15
+   pop r14
+   pop r13
+   pop r12
+   pop rbx
    
    mov rsp, rbp
    pop rbp

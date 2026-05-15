@@ -5,8 +5,8 @@ ASMFLAGS = -f elf64 -g dwarf2
 LDFLAGS = -no-pie 
 
 NAME = game
-C_SRC = 2Kp1c-es.c
-ASM_SRC = 2Kp1-es.asm
+C_SRC = 2Kp2c-es.c
+ASM_SRC = 2Kp2-es.asm
 
 C_OBJ = $(C_SRC:.c=.o)
 ASM_OBJ = $(ASM_SRC:.asm=.o)
