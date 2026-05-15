@@ -355,16 +355,19 @@ updateBoardP2:
    mov  rbp, rsp
    ;guardamos el estado de los registros del procesador porque
    ;las funciones de C no mantienen el estado de los registros.
-   push rdx
-   push rcx
+   push rax            ; padding to keep stack aligned before nested calls
    push rbx            ; rbx = m
+   push rcx
+   push rdx
+   push r11            ; r11d = j
    push r12            ; r12d = rowScreenAux
    push r13            ; r13d = i
    push r14            ; r14d = colScreenAux
-   push r15            ; r15d = j
-   push rsi            ; save score
+   push r15            ; r15 = score
+   push rdi            ; save m for callers that keep it in rdi
 
    mov rbx, rdi        ; rbx = m
+   mov r15, rsi        ; r15 = score
 
    mov r12d, 10        ; rowScreenAux = 10
    xor r13d, r13d      ; i = 0
@@ -374,15 +377,15 @@ updateBoardP2:
 	   jge ub_show_score
 	
 	   mov r14d, 17        ; colScreenAux = 17
-	   xor r15d, r15d      ; j = 0
+	   xor r11d, r11d      ; j = 0
 	
 		ub_inner_for:
-		   cmp r15d, DIMMATRIX
+		   cmp r11d, DIMMATRIX
 		   jge ub_for_inc
 		
 		   mov eax, r13d
 		   imul eax, DIMMATRIX
-		   add eax, r15d
+		   add eax, r11d
 		   cdqe
 		
 		   movsxd rdx, dword [rbx + rax*4]   ; rdx = (long)m[i][j]
@@ -392,7 +395,7 @@ updateBoardP2:
 		   call showNumberP2
 		
 		   add r14d, 9
-		   inc r15d
+		   inc r11d
 		   jmp ub_inner_for
 		
 	ub_for_inc:
@@ -401,7 +404,7 @@ updateBoardP2:
 	   jmp ub_for
 	
 	ub_show_score:
-	   mov rdx, [rsp]             ; rdx = saved score
+	   mov rdx, r15               ; rdx = score
 	
 	   mov edi, 18
 	   mov esi, 35
@@ -413,14 +416,16 @@ updateBoardP2:
 	
 	ub_end:
 	   ;restaurar el estado de los registros que se han guardado en la pila.
-	   pop rsi
+	   pop rdi
 	   pop r15
 	   pop r14
 	   pop r13
 	   pop r12
-	   pop rbx
-	   pop rcx
+	   pop r11
 	   pop rdx
+	   pop rcx
+	   pop rbx
+	   pop rax
 	
 	   mov rsp, rbp
 	   pop rbp
@@ -571,7 +576,7 @@ rotateMatrixLRP2:
 			cmp sil, 76 ; 'L' ascii code
 			jne rm_check_r
 
-			; dest row = DIMMATRIX-i-j 
+			; dest row = DIMMATRIX-1-j
 			mov ebx, DIMMATRIX
 			dec ebx
 			sub ebx, r13d
@@ -694,7 +699,7 @@ shiftNumbersLP2:
 				cmp r14d, DIMMATRIX
 				jge shn_inner_for_inc
 
-				;cmp m[i][j], 0
+				;cmp m[i][k], 0
 				mov eax, r12d
 				imul eax, DIMMATRIX
 				add eax, r14d
@@ -791,7 +796,7 @@ addPairsLP2:
    push r15
    
    mov r15, rdi							; r15 = mPairs
-   xor r14d, r14d							; p = 0
+   xor r14d, r14d						; p = 0
 
    xor r12d, r12d						; i = 0
    ap_for:
@@ -814,7 +819,7 @@ addPairsLP2:
 			je ap_inner_for_inc
 
 			mov ecx, eax
-			inc ecx						; index of mPairs[i][j+1]
+			inc ecx								; index of mPairs[i][j+1]
 
 			mov ebx, dword [r15 + rcx * 4]
 			cmp edx, ebx
@@ -935,10 +940,10 @@ checkEndP2:
    che_continue_i:
 		; while ((i>0) && (m[i][j]!=2048))
 		cmp ebx, 0
-		jle che_after_scan
+		jle che_finish_loop
 		cmp dword [r12 + rax * 4], 2048
 		jne che_do_i
-   che_after_scan:
+   che_finish_loop:
 		; if ((state != 4) && (zeros == 0))
 		cmp r14w, 4
 		je che_return
@@ -1378,4 +1383,3 @@ playP2:
    mov rsp, rbp
    pop rbp
    ret
-
