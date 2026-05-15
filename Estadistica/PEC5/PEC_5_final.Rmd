@@ -1,0 +1,303 @@
+---
+title: 'PEC5: Contraste de hipótesis'
+author: "Ivan Miranda Moral"
+date: "2026-05-12"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("dplyr")
+library("knitr")
+
+ruta_datos <- if (file.exists("Municipios_Sostenibles 2.csv")) {
+  "Municipios_Sostenibles 2.csv"
+} else {
+  "../Municipios_Sostenibles 2.csv"
+}
+
+datos <- read.csv(ruta_datos, header = TRUE, encoding = "UTF-8", stringsAsFactors = TRUE)
+```
+
+## Introducción
+
+El objetivo de esta PEC es analizar la gestión de residuos en una muestra de municipios. Los datos se encuentran en el archivo *Municipios_Sostenibles.csv*. Este dataset incluye información sobre la población, el tipo de municipio y los principales indicadores de reciclaje.
+
+### Variables:
+- *Municipio_ID*: Identificador único.
+- *Habitantes*: Número de personas residentes.
+- *Tipo_Municipio*: Categoría (Urbano, Rural, Turístico).
+- *Residuos_kg_capita*: Kilogramos de residuos generados por persona y año.
+- *Tasa_Reciclaje*: Porcentaje de recogida selectiva.
+- *Coste_Gestion_EUR*: Coste por habitante de la gestión de residuos.
+- *Puerta_a_Puerta*: Si el municipio tiene implementado este sistema (Sí/No).
+
+## Problema 1
+
+(3,5 puntos) La agencia ambiental sospecha que, debido a nuevas políticas, la media poblacional de la \texttt{Tasa\_Reciclaje} en el conjunto de los municipios es superior al 38\%.
+
+a) (1,5 puntos) Formule el contraste de hipótesis adecuado para verificar esta sospecha. Realice el contraste utilizando un nivel de significación del 5\% (\(\alpha = 0.05\)), empleando exclusivamente la instrucción directa de R. Razone la conclusión basándose en el p-valor y compruebe si el resultado es coherente con el intervalo de confianza proporcionado por la salida del programa.
+
+\begin{quote}
+\textcolor{blue}{
+Queremos comprobar si la media poblacional es superior al 38\%. Como la sospecha es que la media ha aumentado, el contraste es unilateral a la derecha.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+Por tanto, se plantean las hipótesis:
+\[
+\left\{
+\begin{array}{l}
+H_0:\mu \leq 38 \\
+H_1:\mu > 38
+\end{array}
+\right.
+\]
+}
+\end{quote}
+``` {r 1a}
+t.test(datos$Tasa_Reciclaje, mu = 38, alternative = "greater", conf.level = 0.95)
+```
+
+
+\begin{quote}
+\textcolor{blue}{
+La media muestral obtenida es \(\bar{x}=40.006\). Como el p-valor es 0.04804 y es inferior a \(\alpha=0.05\), se rechaza la hipótesis nula.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+Por tanto, hay evidencia estadísticamente significativa, con un nivel de significación del 5\%, para afirmar que la media poblacional de la tasa de reciclaje es superior al 38\%.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+El resultado es coherente con el intervalo de confianza unilateral proporcionado por R, ya que el límite inferior del intervalo es 38.024 y queda por encima de 38. Por tanto, el p-valor y el intervalo de confianza llevan a la misma conclusión.
+}
+\end{quote}
+
+
+b) (2 puntos) Realice el mismo contraste utilizando las fórmulas de los módulos. Debe indicar:
+
+1. Hipótesis nula (\(H_0\)) y alternativa (\(H_1\)) utilizando la simbología correcta (\(\mu\), \(\mu_0\)).
+2. Cálculo del estadístico de contraste mediante la fórmula correspondiente.
+3. Cálculo del p-valor mediante R.
+4. Decisión y conclusión final aplicada al contexto del problema.
+
+
+\begin{quote}
+\textcolor{blue}{
+Tomamos \(\mu_0=38\). Entonces, las hipótesis del contraste son:
+\[
+\left\{
+\begin{array}{l}
+H_0:\mu \leq 38 \\
+H_1:\mu > 38
+\end{array}
+\right.
+\]
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+Como la varianza poblacional es desconocida, utilizamos el siguiente estadístico de contraste:
+\[
+t=\frac{\bar{x}-\mu_0}{s/\sqrt{n}}
+\]
+donde \(\bar{x}\) es la media muestral, \(s\) la desviación típica muestral y \(n\) el tamaño de la muestra.
+}
+\end{quote}
+``` {r 1b}
+x <- mean(datos$Tasa_Reciclaje)
+s <- sd(datos$Tasa_Reciclaje)
+n <- length(datos$Tasa_Reciclaje)
+mu0 <- 38
+alpha <- 0.05
+
+t <- (x - mu0) / (s / sqrt(n))
+p_valor <- pt(t, df = n - 1, lower.tail = FALSE)
+
+resultados_1b <- data.frame(
+  Estadístico = c("Media muestral", "Desviación típica muestral", "Tamaño muestral",
+                  "Estadístico t", "p-valor"),
+  Valor = c(x, s, n, t, p_valor))
+
+resultados_1b$Valor <- c(sprintf("%.3f", x), sprintf("%.3f", s), sprintf("%.0f", n),
+                         sprintf("%.3f", t), sprintf("%.5f", p_valor))
+
+kable(resultados_1b, caption = "Resumen del contraste")
+```
+
+``` {r 1b_decision}
+if (p_valor < alpha) "Rechazamos la hipótesis nula" else "No rechazamos la hipótesis nula"
+```
+
+\begin{quote}
+\textcolor{blue}{
+Como el p-valor es inferior al nivel de significación, rechazamos la hipótesis nula \(H_0\).
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+La conclusión final es la misma que en el apartado anterior: con un nivel de significación del 5\%, los datos aportan evidencia suficiente para afirmar que la media poblacional de la tasa de reciclaje de los municipios es superior al 38\%.
+}
+\end{quote}
+
+\begin{quote}
+Referencias:
+\begin{itemize}
+\item \textbf{Contraste de hipótesis}, unidad \textbf{Introducción al contraste de hipótesis}, apartado \textbf{1. Hipótesis nula y alternativa}, p. 5.
+\item \textbf{Contraste de hipótesis}, unidad \textbf{Introducción al contraste de hipótesis}, apartado \textbf{4. El p-valor}, p. 11.
+\item \textbf{Contraste de hipótesis}, unidad \textbf{Introducción al contraste de hipótesis}, apartado \textbf{6. Relación con los intervalos de confianza}, p. 12.
+\item \textbf{Contraste de hipótesis}, unidad \textbf{Contrastes sobre la media y sobre la proporción}, apartado \textbf{1.2. Caso de la varianza desconocida}, p. 18.
+\end{itemize}
+\end{quote}
+
+## Problema 2
+
+(3 puntos) Se quiere determinar si la proporción de municipios que han implementado el sistema \texttt{Puerta\_a\_Puerta} es igual al 50\% o si es diferente. Utilice un nivel de significación del 5\% (\(\alpha = 0.05\)) para realizar el contraste de hipótesis. Debe indicar:
+
+1. El tipo de contraste (unilateral o bilateral) y las hipótesis \(H_0\) y \(H_1\).
+2. Realizar el test correspondiente con R.
+3. La interpretación del p-valor obtenido para llegar a la conclusión.
+
+\begin{quote}
+\textcolor{blue}{
+Queremos comprobar si la proporción es igual al 50\% o si es diferente. Por tanto, el contraste es bilateral.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+Si \(p\) representa la proporción poblacional de municipios con sistema puerta a puerta, las hipótesis son:
+\[
+\left\{
+\begin{array}{l}
+H_0:p=0.5 \\
+H_1:p\neq 0.5
+\end{array}
+\right.
+\]
+}
+\end{quote}
+
+``` {r 2}
+contraste_2 <- prop.test(sum(datos$Puerta_a_Puerta == "Sí"), nrow(datos), p = 0.5,
+                         alternative = "two.sided", conf.level = 0.95)
+contraste_2
+```
+
+\begin{quote}
+\textcolor{blue}{
+En la muestra hay 51 municipios con este sistema sobre un total de 100. Por tanto, la proporción muestral es \(\hat{p}=0.51\).
+}
+\end{quote}
+
+``` {r 2_decision}
+p_valor <- contraste_2$p.value
+alpha <- 0.05
+
+if (p_valor < alpha) "Rechazamos la hipótesis nula" else "No rechazamos la hipótesis nula"
+```
+
+\begin{quote}
+\textcolor{blue}{
+Como el p-valor obtenido es 0.9203 y es superior a 0.05, no rechazamos la hipótesis nula \(H_0\).
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+Por tanto, no hay evidencia estadísticamente significativa para afirmar que la proporción de municipios que han implantado el sistema puerta a puerta sea distinta del 50\%.
+}
+\end{quote}
+
+\begin{quote}
+Referencias:
+\begin{itemize}
+\item \textbf{Contraste de hipótesis}, unidad \textbf{Introducción al contraste de hipótesis}, apartado \textbf{1. Hipótesis nula y alternativa}, p. 5.
+\item \textbf{Contraste de hipótesis}, unidad \textbf{Introducción al contraste de hipótesis}, apartado \textbf{4. El p-valor}, p. 11.
+\item \textbf{Contraste de hipótesis}, unidad \textbf{Introducción al contraste de hipótesis}, apartado \textbf{5. Resolver un contraste de hipótesis}, p. 12.
+\item \textbf{Contraste de hipótesis}, unidad \textbf{Contrastes sobre la media y sobre la proporción}, apartado \textbf{2. Contrastes sobre la proporción (muestras grandes)}, p. 22--24.
+\end{itemize}
+\end{quote}
+
+## Problema 3
+
+(3,5 puntos) Queremos evaluar si existe una diferencia significativa entre \texttt{Coste\_Gestion\_EUR} de los municipios de tipo “Urbano” frente a los de tipo “Rural”. Asumiendo que las varianzas poblacionales son desconocidas pero iguales, realice el contraste con un nivel de significación del 1\% (\(\alpha = 0.01\)).
+
+1. Defina las hipótesis nula y alternativa.
+2. Prepare los subconjuntos de datos en R para ambos tipos de municipio.
+3. Ejecute el test de contraste correspondiente.
+4. Indique el p-valor, la decisión tomada y calcule el intervalo de confianza para la diferencia de medias, justificando la relación entre este intervalo y la conclusión final.
+
+\begin{quote}
+\textcolor{blue}{
+Queremos comprobar si la media del coste de gestión es diferente entre los municipios urbanos y los rurales. Como se pregunta si existe una diferencia significativa, el contraste es bilateral.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+Si \(\mu_U\) es la media poblacional del coste en municipios urbanos y \(\mu_R\) la media poblacional del coste en municipios rurales, las hipótesis son:
+\[
+\left\{
+\begin{array}{l}
+H_0:\mu_U-\mu_R=0 \\
+H_1:\mu_U-\mu_R\neq 0
+\end{array}
+\right.
+\]
+}
+\end{quote}
+
+``` {r 3_subconjuntos}
+coste_urbano <- subset(datos, Tipo_Municipio == "Urbano")$Coste_Gestion_EUR
+coste_rural <- subset(datos, Tipo_Municipio == "Rural")$Coste_Gestion_EUR
+
+resumen_subconjuntos <- data.frame(
+  Tipo_Municipio = c("Urbano", "Rural"),
+  Tamaño_muestral = c(length(coste_urbano), length(coste_rural))
+)
+
+kable(resumen_subconjuntos, caption = "Tamaño muestral de los subconjuntos")
+```
+
+``` {r 3_test}
+contraste_3 <- t.test(coste_urbano, coste_rural, alternative = "two.sided",
+                      var.equal = TRUE, conf.level = 0.99)
+contraste_3
+```
+
+``` {r 3_decision}
+p_valor <- contraste_3$p.value
+alpha <- 0.01
+
+if (p_valor < alpha) "Rechazamos la hipótesis nula" else "No rechazamos la hipótesis nula"
+```
+
+\begin{quote}
+\textcolor{blue}{
+Como el p-valor es superior al nivel de significación, no rechazamos la hipótesis nula \(H_0\).
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+El intervalo de confianza del 99\% para la diferencia de medias entre municipios urbanos y rurales es [-31.155,\ 31.916]. Como este intervalo contiene el valor 0, la conclusión es coherente con la del contraste: no hay evidencia estadísticamente significativa de diferencias entre los costes medios de gestión de los municipios urbanos y rurales.
+}
+\end{quote}
+
+\begin{quote}
+Referencias:
+\begin{itemize}
+\item \textbf{Contraste de dos muestras}, unidad \textbf{Contrastes sobre la diferencia de medias}, apartado \textbf{2.2. Caso de varianzas poblacionales desconocidas pero iguales}, p. 7--8.
+\item \textbf{Contraste de dos muestras}, unidad \textbf{Contrastes sobre la diferencia de medias}, apartado \textbf{3.2. Caso de varianzas poblacionales desconocidas e iguales}, p. 12.
+\end{itemize}
+\end{quote}

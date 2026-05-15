@@ -1,0 +1,543 @@
+---
+title: 'PEC4: Intervalos de confianza'
+author: "Ivan Miranda Moral"
+date: "2026-04-18"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("dplyr")
+library("knitr")
+library("ggplot2")
+
+setwd("~/Developer/GitHub/UOC/Estadistica/PEC4/")
+```
+
+## Introducción
+
+La empresa *Cloud-Tech Solutions* ha migrado parte de sus servicios a un nuevo clúster de servidores repartido en dos servidores principales: Srv_A (hardware tradicional) y Srv_B (hardware de última generación). Tras un mes de funcionamiento, el departamento de Operaciones de Red (NOC) ha extraído una muestra aleatoria constituida por un dataset con 1000 registros de telemetría para evaluar si la inversión en el nuevo hardware está justificada y si el sistema cumple con los Acuerdos de Nivel de Servicio (SLA).
+
+Los datos se encuentran en el archivo *Metricas_red.csv*. Este dataset incluye información sobre:
+
+- *id*: Identificador único de la petición.
+- *servidor*: Nodo que procesó la solicitud (Srv_A o Srv_B).
+- *latencia_ms*: Latencia media global que es el tiempo de ida y vuelta de la señal en milisegundos (ms).
+- *uso_cpu*: Porcentaje de carga en el momento de la captura.
+- *error_log*: Estado final de la transacción (Exito/Fallo).
+
+Para importar los datos pueden usar las siguientes instrucciones:
+```{r intro}
+datos <- read.csv("Metricas_red.csv", header = TRUE, encoding = "UTF-8",
+                  stringsAsFactors = TRUE)
+datos <- datos[, -1]
+```
+
+## Problema 1
+
+(1 punto) Para evitar sesgos por inactividad, consideraremos únicamente los registros en los que el *uso_cpu* sea superior al 10%. El filtrado asegura que analizaremos el rendimiento bajo una carga de trabajo real. A este nuevo conjunto de datos le llamaremos *datos_activos*. Y será el conjunto de datos que analizaremos en los problemas 2 y 3. Se pide: cree el conjunto de *datos_activos*, muestre sus 6 primeras líneas y calcule qué porcentaje representa del total de datos.
+```{r 1}
+datos_activos <- datos %>%
+                  filter(uso_cpu > 10)
+```
+\begin{quote}
+\textcolor{blue}{El conjunto \texttt{datos\_activos}
+filtra los registros en los que el uso de CPU es superior al 10\%, con el objetivo de analizar únicamente situaciones de carga real del sistema.}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{ 
+A continuación, se muestran las primeras 6 observaciones del nuevo conjunto de datos:
+}
+\end{quote}
+```{r 1_head}
+top_6 <- head(datos_activos)
+
+kable(top_6, caption = "Primeras 6 observaciones de datos_activos")
+```
+
+``` {r 1_porcentaje}
+porcentaje <- (nrow(datos_activos) / nrow(datos)) * 100
+
+porcentaje
+```
+\begin{quote}
+\textcolor{blue}{ 
+Finalmente, se ha calculado que este subconjunto representa un \textbf{`r porcentaje`\%} del total de los datos originales.
+}
+\end{quote}
+
+\begin{quote}
+Referencias:
+\begin{itemize}
+\item \textbf{Análisis de datos y estadística descriptiva con R}, unidad \textbf{3. Análisis demográfico en Cataluña}, apartado \textbf{3.1. Manejo de conjuntos de datos}, p. 31.
+\end{itemize}
+\end{quote}
+
+## Problema 2
+
+(1.5 puntos) El SLA exige que la latencia media no supere los 46 ms. Calcule, con la correspondiente instrucción de R, un intervalo de confianza del 95% para la media de la latencia. A partir del resultado obtenido, ¿se cumplen las exigencias del SLA? Indique qué intervalo de confianza se pide, así como qué distribución sigue el valor crítico. Se puede suponer que la latencia se distribuye normalmente.
+
+\begin{quote}
+\textcolor{blue}{
+Se ha calculado un intervalo de confianza del 95\% para la media poblacional de la latencia utilizando la instrucción:
+}
+\end{quote}
+``` {r 2}
+t.test(datos_activos$latencia_ms, conf.level = 0.95)
+```
+\begin{quote}
+\textcolor{blue}{El intervalo de confianza obtenido permite estimar el valor de la media poblacional a partir de la media muestral.}
+
+\textcolor{blue}{Dado que se supone que la latencia sigue una distribución normal y la varianza poblacional es desconocida, seguimos una distribución \(t\) de Student con 938 grados de libertad.}
+
+\textcolor{blue}{El intervalo de confianza es un intervalo para la media con varianza desconocida basado en la distribución \(t\).}
+
+\textcolor{blue}{El intervalo de confianza obtenido es \textbf{[44,815, 45,771]} ms.}
+
+\textcolor{blue}{Dado que todo el intervalo se encuentra por debajo del umbral de 46 ms establecido en el SLA, se concluye que la latencia media cumple las exigencias del SLA con un nivel de confianza del 95\%.
+}
+\end{quote}
+
+\begin{quote}
+Referencias:
+\begin{itemize}
+\item \textbf{Intervalos de confianza}, unidad \textbf{Introducción a los intervalos de confianza. El caso de la media aritmética}, apartado \textbf{3. Intervalo de confianza para la media cuando la población es normal y desconocemos la desviación típica}, p. 11--13.
+\item \textbf{Teorema del límite central}, unidad \textbf{La distribución de la media muestral}, apartado \textbf{1.2. Caso de desviación típica poblacional desconocida. La t de Student}, p. 8--10.
+\end{itemize}
+\end{quote}
+
+## Problema 3
+
+(2 puntos) Si queremos que el intervalo de confianza del problema anterior tenga un error máximo de 0.2 ms, ¿cuál debería de ser el tamaño del conjunto de *datos_activos*? Explique paso a paso la resolución del problema. Indique también el módulo de teoría, el apartado y las páginas consultadas.
+
+\begin{quote}
+\textcolor{blue}{
+Queremos que el intervalo de confianza del 95\% para la media tenga un error máximo de 0.2 ms.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+En el problema anterior se trabajó con un intervalo de confianza para la media poblacional con varianza desconocida, por lo que el valor crítico sigue una distribución \(t\) de Student y el intervalo tiene la forma:
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{\[
+\bar{x} \pm t_{\alpha/2,n-1}\frac{s}{\sqrt{n}}
+\]}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{ Esto aparece en el apartado de inferencia sobre la media con varianza poblacional desconocida. El margen de error es:}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{\[
+E = t_{\alpha/2,n-1}\frac{s}{\sqrt{n}}
+\]}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{ Como queremos que el error máximo sea E=0,2, imponemos:}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{\[
+t_{\alpha/2,n-1}\frac{s}{\sqrt{n}} \leq 0.2
+\]}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{En este caso no existe un procedimiento directo exacto para obtener \(n\), ya que el margen de error depende de la desviación típica muestral \(s\), que solo conocemos a partir de una muestra previa. Si necesitamos aproximar el tamaño muestral, podemos usar una muestra de prueba para estimar \(s\) y a partir de ahí calcular el tamaño necesario.}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{ Primero se calcula una aproximación inicial con el valor crítico normal:}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{\[
+n_0 = \left(\frac{z_{0.975}\, s}{0.2}\right)^2
+\]}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{ y después se refina usando la distribución t de Student:}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{\[
+n_1 = \left(\frac{t_{0.975,n_0-1}\, s}{0.2}\right)^2
+\]}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+En el código siguiente, se calcula la desviación típica muestral \(s\), se fija el error máximo \(E\), y se obtiene una primera aproximación del tamaño muestral mediante la distribución normal (\texttt{qnorm}). Se refina el cálculo utilizando la distribución t de Student (\texttt{qt}).
+}
+\end{quote}
+
+``` {r 3}
+s <- sd(datos_activos$latencia_ms)
+E <- 0.2
+
+n0 <- ceiling((qnorm(0.975) * s / E)^2)
+n1 <- ceiling((qt(0.975, df = n0 - 1) * s / E)^2)
+
+n0
+n1
+```
+\begin{quote}
+\textcolor{blue}{
+Se obtiene como resultado \(n_1 = 5346\).
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+Por tanto, el tamaño mínimo necesario para garantizar un error máximo de 0,2 ms en un intervalo de confianza del 95\% es de \textbf{5346 observaciones}.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+Dado que el conjunto \texttt{datos\_activos} contiene únicamente \textbf{939 observaciones}, se concluye que el tamaño muestral actual \textbf{no es suficiente para alcanzar el nivel de precisión deseado}.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+Se redondea por exceso, ya que el tamaño muestral debe ser entero y se desea garantizar que el error no supere el valor fijado.
+}
+\end{quote}
+
+\begin{quote}
+Referencias:
+\begin{itemize}
+\item \textbf{Intervalos de confianza}, unidad \textbf{Introducción a los intervalos de confianza. El caso de la media aritmética}, apartado \textbf{3. Intervalo de confianza para la media cuando la población es normal y desconocemos la desviación típica}, p. 11--13.
+\item \textbf{Intervalos de confianza}, unidad \textbf{Introducción a los intervalos de confianza. El caso de la media aritmética}, apartado \textbf{3.1. El tamaño de la muestra}, p. 13--14.
+\item \textbf{Distribuciones de probabilidad e inferencia estadística con R}, unidad \textbf{2. Inferencia estadística}, apartado \textbf{2.2. Inferencia sobre la media con varianza poblacional desconocida}, p. 27.
+\end{itemize}
+\end{quote}
+
+## Problema 4
+
+(3.5 puntos) En la mayoría de las arquitecturas, cuando el uso de CPU supera el 70%, el sistema entra en una zona donde el context switching (cambio de contexto) y las *colas de espera* empiezan a degradar la latencia de forma no lineal. Se dice que el sistema está bajo *estrés crítico*.
+
+a) (1 punto) Construya con R una tabla de contingencia de las variables *servidor* y *error_log* cuando el sistema está bajo estrés crítico. Sume por filas y columnas y añada estos totales a la tabla mediante la instrucción *addmargins*.
+
+\begin{quote}
+\textcolor{blue}{
+Se han seleccionado los registros en los que el uso de CPU es superior al 70\%, ya que corresponden a situaciones de estrés crítico del sistema.
+}
+\end{quote}
+
+``` {r 4a_data}
+datos_critico <- subset(datos_activos, uso_cpu > 70)
+```
+
+\begin{quote}
+\textcolor{blue}{
+A partir de este subconjunto de datos, se ha construido una tabla de contingencia entre las variables \texttt{servidor} y \texttt{error\_log}, que permite analizar la frecuencia de éxitos y fallos en cada servidor bajo condiciones de alta carga.
+}
+\end{quote}
+``` {r 4a_critical_stress}
+tabla <- table(datos_critico$servidor, datos_critico$error_log)
+
+kable(tabla, caption = "Tabla de contingencia bajo estrés crítico")
+```
+
+\begin{quote}
+\textcolor{blue}{
+Despues se han añadido los totales por filas y columnas mediante la función \texttt{addmargins}, lo que facilita la interpretación global de los datos.
+}
+\end{quote}
+
+
+``` {r 4a_addmargins}
+tabla_totales <- addmargins(tabla)
+
+kable(tabla_totales, caption = "Tabla con totales por filas y columnas")
+```
+
+\begin{quote}
+\textcolor{blue}{
+La tabla resultante permite comparar el comportamiento de ambos servidores en situaciones de estrés crítico, tanto en términos absolutos como relativos.
+}
+\end{quote}
+
+\begin{quote}
+Referencias:
+\begin{itemize}
+\item \textbf{Probabilidad y variables aleatorias}, unidad \textbf{El teorema de Bayes}, apartado \textbf{4. Tablas de contingencia}, p. 43.
+\item \textbf{AprendeR-Parte-I}, capítulo \textbf{10. Descripción de datos cualitativos}, apartados \textbf{10.3. Tablas bidimensionales de frecuencias}, \textbf{10.5. Tablas a partir de data frames de variables cualitativas} y \textbf{10.9. Guía rápida de funciones}, p. 208, p. 220 y p. 242.
+\end{itemize}
+\end{quote}
+
+b) (1 punto) Utilizando los datos de la tabla de contingencia obtenida en el apartado a), halle con R un intervalo de confianza del 90% de la proporción de fallos en el Servidor A cuando el sistema está bajo estrés crítico. Utilice la función *prop.test* con la opción *correct=FALSE*.
+
+\begin{quote}
+\textcolor{blue}{
+A partir de la tabla de contingencia obtenida en el apartado anterior, se ha calculado un intervalo de confianza del 90\% para la proporción de fallos en el servidor \texttt{Srv\_A} bajo condiciones de estrés crítico.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+Para ello, se ha utilizado la función \texttt{prop.test} sin corrección de continuidad (\texttt{correct = FALSE}), tomando como número de éxitos el número de fallos en \texttt{Srv\_A} y como tamaño muestral el total de observaciones de dicho servidor.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+El intervalo obtenido permite estimar la proporción poblacional de fallos en el servidor \texttt{Srv\_A}.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+Dado que el tamaño muestral es suficientemente grande, se utiliza la aproximación normal para la distribución de la proporción muestral.
+}
+\end{quote}
+``` {r 4b}
+x <- tabla["Srv_A", "Fallo"]
+n <- sum(tabla["Srv_A", ])
+
+prop.test(x, n, conf.level = 0.90, correct = FALSE)
+```
+\begin{quote}
+Referencias:
+\begin{itemize}
+\item \textbf{Intervalos de confianza}, unidad \textbf{Intervalo de confianza para la proporción}, apartado \textbf{1. Procedimiento para construir un intervalo de confianza para la proporción}, p. 21--22.
+\item \textbf{Teorema del límite central}, unidad \textbf{El teorema del límite central}, apartado \textbf{1.1. Estudio de la proporción}, p. 16.
+\item \textbf{Distribuciones de probabilidad e inferencia estadística con R}, unidad \textbf{2. Inferencia estadística}, apartado \textbf{2.4. Inferencia sobre la proporción}, p. 31.
+\end{itemize}
+\end{quote}
+
+c) (1 punto) Utilizando los datos de la tabla de contingencia obtenida en el apartado a), halle con R un intervalo de confianza del 90% de la proporción de fallos en el Servidor B cuando el sistema está bajo estrés crítico. Utilice la función *prop.test* con la opción *correct=FALSE*.
+
+\begin{quote}
+\textcolor{blue}{
+A partir de la tabla de contingencia obtenida en el apartado anterior, se ha calculado un intervalo de confianza del 90\% para la proporción de fallos en el servidor \texttt{Srv\_B} bajo condiciones de estrés crítico.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+Para ello, se ha utilizado la función \texttt{prop.test} sin corrección de continuidad (\texttt{correct = FALSE}), tomando como número de éxitos el número de fallos en \texttt{Srv\_B} y como tamaño muestral el total de observaciones de dicho servidor.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+El intervalo obtenido permite estimar la proporción poblacional de fallos en el servidor \texttt{Srv\_B}.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+Dado que el tamaño muestral es suficientemente grande, se utiliza la aproximación normal para la distribución de la proporción muestral.
+}
+\end{quote}
+``` {r 4c}
+x_B <- tabla["Srv_B", "Fallo"]
+n_B <- sum(tabla["Srv_B", ])
+
+prop.test(x_B, n_B, conf.level = 0.90, correct = FALSE)
+```
+\begin{quote}
+Referencias:
+\begin{itemize}
+\item \textbf{Intervalos de confianza}, unidad \textbf{Intervalo de confianza para la proporción}, apartado \textbf{1. Procedimiento para construir un intervalo de confianza para la proporción}, p. 21--22.
+\item \textbf{Teorema del límite central}, unidad \textbf{El teorema del límite central}, apartado \textbf{1.1. Estudio de la proporción}, p. 16.
+\item \textbf{Distribuciones de probabilidad e inferencia estadística con R}, unidad \textbf{2. Inferencia estadística}, apartado \textbf{2.4. Inferencia sobre la proporción}, p. 31.
+\end{itemize}
+\end{quote}
+
+d) (0.5 puntos) En base a los apartados anteriores, ¿podemos decir que las proporciones son diferentes? Razone la respuesta. Compare y comente los intervalos obtenidos.
+
+\begin{quote}
+\textcolor{blue}{
+Para determinar si las proporciones de fallos en los servidores \texttt{Srv\_A} y \texttt{Srv\_B} son diferentes, se comparan los intervalos de confianza del 90\% obtenidos en los apartados anteriores.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+El intervalo para \texttt{Srv\_A} es \([0,0433,\; 0,1114]\), mientras que el de \texttt{Srv\_B} es \([0,0327,\; 0,0993]\).
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+Se observa que ambos intervalos se solapan, por lo que no se puede afirmar con suficiente evidencia estadística que las proporciones de fallos sean diferentes entre ambos servidores bajo condiciones de estrés crítico.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+Aunque la proporción muestral de fallos en \texttt{Srv\_B} es ligeramente inferior, esta diferencia no es concluyente desde el punto de vista inferencial.
+}
+\end{quote}
+
+\begin{quote}
+Referencias:
+\begin{itemize}
+\item \textbf{Intervalos de confianza}, unidad \textbf{Intervalo de confianza para la proporción}, apartado \textbf{1. Procedimiento para construir un intervalo de confianza para la proporción}, p. 21--22.
+\item \textbf{Teorema del límite central}, unidad \textbf{El teorema del límite central}, apartado \textbf{1.1. Estudio de la proporción}, p. 16.
+\item \textbf{Distribuciones de probabilidad e inferencia estadística con R}, unidad \textbf{2. Inferencia estadística}, apartado \textbf{2.4. Inferencia sobre la proporción}, p. 31.
+\end{itemize}
+\end{quote}
+
+## Problema 5
+
+(2 puntos) En este problema no se va a utilizar el dataframe inicial, sino que se va a simular una variable aleatoria. En relación con los problemas de redes es importante la *Distribución del Tráfico en el Tiempo dentro de un Ciclo (ms)*.
+
+Imaginemos que un servidor divide su tiempo en ciclos de 1 segundo (1000 ms). Las peticiones de los usuarios son totalmente independientes: una persona en Madrid hace clic en un enlace, otra en Barcelona abre una imagen. . . no están coordinadas entre sí.
+
+En un sistema con tráfico constante y aleatorio, la probabilidad de que una petición llegue entre el milisegundo 12 y el 22, entre el 500 y el 522 o en el 950 y el 972 es exactamente la misma. Así pues, podemos pensar que el tiempo de llegada de una petición sigue una Distribución Uniforme.
+
+Simularemos una población con distribución uniforme, y extraeremos múltiples muestras para analizar su variabilidad.
+
+a) (0.5 puntos) Genere una población de 10.000 individuos distribuidos según una distribución Uniforme(0, 1000). Es importante fijar la semilla para poder replicar los resultados. Hay que poner: *set.seed(2026)*.
+
+``` {r 5a_math}
+set.seed(2026)
+
+poblacion <- runif(10000, min = 0, max = 1000)
+
+resumen <- summary(poblacion)
+resumen_df <- data.frame(
+  Estadistico = names(resumen),
+  Valor = round(as.numeric(resumen), 3)
+)
+```
+\begin{quote}
+\textcolor{blue}{
+Se ha generado una población de 10.000 observaciones siguiendo una distribución uniforme en el intervalo (0, 1000), que representa el instante de llegada de peticiones dentro de un ciclo de 1 segundo.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+Para garantizar la reproducibilidad de los resultados, se ha fijado la semilla mediante la instrucción \texttt{set.seed(2026)}. Posteriormente, se ha utilizado la función \texttt{runif} de R para generar los valores de la población.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+El resumen estadístico obtenido es coherente con una distribución uniforme de los datos en el intervalo especificado.
+}
+\end{quote}
+
+```{r 5a_table}
+kable(resumen_df, caption = "Resumen estadístico de la población simulada")
+```
+
+\begin{quote}
+Referencias:
+\begin{itemize}
+\item \textbf{Probabilidad y variables aleatorias}, unidad \textbf{Distribuciones discretas conocidas. La ley normal}, apartado \textbf{1. Distribución uniforme}, p. 94.
+\item \textbf{Distribuciones de probabilidad e inferencia estadística con R}, unidad \textbf{1. Distribuciones de probabilidad}, apartado \textbf{1.3.1. Distribución uniforme}, p. 18.
+\end{itemize}
+\end{quote}
+
+b) (1 punto) Extraiga 1000 muestras de tamaño 5, 50 y 250 respectivamente. Con las 1000 muestras de tamaño 5 considere la muestra de las medias y lo mismo para las 1000 muestras de tamaño 50 y 250. Por último, calcule la media y la desviación típica de las muestras de las medias de tamaño 5, 50 y 250, respectivamente.
+
+\begin{quote}
+\textcolor{blue}{
+Se han generado 1000 muestras aleatorias de tamaños 5, 50 y 250 a partir de la población uniforme simulada. Para cada conjunto de muestras se ha calculado la media muestral, obteniendo así tres distribuciones de medias.
+}
+\end{quote}
+``` {r 5b_muestras}
+medias_5 <- replicate(1000, mean(sample(poblacion, 5)))
+medias_50 <- replicate(1000, mean(sample(poblacion, 50)))
+medias_250 <- replicate(1000, mean(sample(poblacion, 250)))
+```
+
+\begin{quote}
+\textcolor{blue}{
+A continuación, se han calculado la media y la desviación típica de dichas distribuciones:
+}
+\end{quote}
+
+``` {r 5b_mean_sd}
+medias_5_m <- mean(medias_5)
+medias_5_sd <- sd(medias_5)
+medias_50_m <- mean(medias_50)
+medias_50_sd <- sd(medias_50)
+medias_250_m <- mean(medias_250)
+medias_250_sd <- sd(medias_250)
+```
+
+``` {r 5b_table}
+resultados <- data.frame(
+  Tamaño = c(5, 50, 250),
+  Media = c(medias_5_m, medias_50_m, medias_250_m),
+  Desviacion = c(medias_5_sd, medias_50_sd, medias_250_sd)
+)
+
+kable(round(resultados, 3),
+      col.names = c("Tamaño", "Media", "Desviación típica"),
+      caption = "Resumen de las medias muestrales")
+```
+
+\begin{quote}
+\textcolor{blue}{
+Se observa que, a medida que aumenta el tamaño muestral, la media de las medias se aproxima al valor teórico de la población (500), mientras que la desviación típica disminuye, indicando una menor variabilidad en las medias muestrales.
+}
+\end{quote}
+
+\begin{quote}
+Referencias:
+\begin{itemize}
+\item \textbf{Teorema del límite central}, unidad \textbf{La distribución de la media muestral}, apartado \textbf{1. Distribución de la media muestral para variables normales}, p. 5--7.
+\item \textbf{Teorema del límite central}, unidad \textbf{El teorema del límite central}, apartado \textbf{2. El teorema del límite central}, p. 17.
+\item \textbf{Distribuciones de probabilidad e inferencia estadística con R}, unidad \textbf{1. Distribuciones de probabilidad}, apartado \textbf{1.3.5. Teorema del límite central}, p. 25.
+\end{itemize}
+\end{quote}
+
+c) (0.5 puntos) Muestre las tres distribuciones de medias, mediante sus correspondientes histogramas y compárelas. Interprete los resultados y relaciónelos con el Teorema Central del Límite.
+
+\begin{quote}
+\textcolor{blue}{
+Los histogramas de las distribuciones de las medias muestrales para tamaños de muestra 5, 50 y 250.
+}
+\end{quote}
+
+``` {r 5c}
+par(mfrow = c(1,3))  # 3 gráficos en una fila
+
+hist(medias_5, main = "Medias (n = 5)", xlab = "Media", breaks = 30)
+hist(medias_50, main = "Medias (n = 50)", xlab = "Media", breaks = 30)
+hist(medias_250, main = "Medias (n = 250)", xlab = "Media", breaks = 30)
+```
+
+\begin{quote}
+\textcolor{blue}{
+Para muestras de tamaño 5, la distribución de las medias presenta mayor dispersión y una forma menos regular. A medida que el tamaño muestral aumenta (n = 50 y n = 250), las distribuciones se vuelven más concentradas alrededor del valor central (aproximadamente 500) y adoptan una forma cada vez más simétrica y similar a una distribución normal.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+Además, la variabilidad de las medias disminuye conforme aumenta el tamaño de la muestra, lo que se refleja en histogramas más estrechos.
+}
+\end{quote}
+
+\begin{quote}
+\textcolor{blue}{
+Este comportamiento es coherente con el Teorema del Límite Central, que establece que la distribución de las medias muestrales tiende a una distribución normal a medida que aumenta el tamaño muestral, independientemente de la distribución original de la población.
+}
+\end{quote}
+
+\begin{quote}
+Referencias:
+\begin{itemize}
+\item \textbf{Teorema del límite central}, unidad \textbf{La distribución de la media muestral}, apartado \textbf{1. Distribución de la media muestral para variables normales}, p. 5--7.
+\item \textbf{Teorema del límite central}, unidad \textbf{El teorema del límite central}, apartado \textbf{2. El teorema del límite central}, p. 17.
+\item \textbf{Distribuciones de probabilidad e inferencia estadística con R}, unidad \textbf{1. Distribuciones de probabilidad}, apartado \textbf{1.3.5. Teorema del límite central}, p. 25.
+\end{itemize}
+\end{quote}
