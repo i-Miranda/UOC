@@ -267,6 +267,8 @@ showNumberP2:
    push r12
    push r13
    push r14
+   push r15
+   push rcx
 
    mov rax, rdx		;num	
    mov r12d, edi	;rowScreen
@@ -283,10 +285,10 @@ showNumberP2:
    sn_num_999999:
 		mov rax, 999999
    sn_init_for:
-		xor rcx, rcx				; i = 0
+		xor r15d, r15d				; i = 0
    ; --------------FOR LOOP-------------
    sn_for:
-		cmp rcx, 6					; while (i) < 6
+		cmp r15d, 6					; while (i) < 6
 		jge sn_end
 		mov r14b, 32				; ' ' ascii code
 		cmp rax, 0 					; this if keeps numbers right-aligned
@@ -306,10 +308,12 @@ showNumberP2:
 		call printchP2
 
 		dec r13d					; next left digit
-		inc rcx
+		inc r15d
 		jmp sn_for
    sn_end:
-   ;restaurar el estado de los registros que se han guardado en la pila.
+   ;restaurar el estado de los registros que se han guardado en la pila
+   pop rcx
+   pop r15
    pop r14
    pop r13
    pop r12
