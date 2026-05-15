@@ -364,61 +364,61 @@ updateBoardP2:
    mov r12d, 10        ; rowScreenAux = 10
    xor r13d, r13d      ; i = 0
 
-ub_for:
-   cmp r13d, DIMMATRIX
-   jge ub_show_score
-
-   mov r14d, 17        ; colScreenAux = 17
-   xor r15d, r15d      ; j = 0
-
-ub_inner_for:
-   cmp r15d, DIMMATRIX
-   jge ub_for_inc
-
-   mov eax, r13d
-   imul eax, DIMMATRIX
-   add eax, r15d
-   cdqe
-
-   movsxd rdx, dword [rbx + rax*4]   ; rdx = (long)m[i][j]
-
-   mov edi, r12d       ; rowScreenAux
-   mov esi, r14d       ; colScreenAux
-   call showNumberP2
-
-   add r14d, 9
-   inc r15d
-   jmp ub_inner_for
-
-ub_for_inc:
-   add r12d, 2
-   inc r13d
-   jmp ub_for
-
-ub_show_score:
-   pop rdx             ; rdx = saved score
-
-   mov edi, 18
-   mov esi, 35
-   call showNumberP2
-
-   mov edi, 18
-   mov esi, 36
-   call gotoxyP2
-
-ub_end:
-   ;restaurar el estado de los registros que se han guardado en la pila.
-
-   ;no pop rsi so we don't lose the score
-   pop r15
-   pop r14
-   pop r13
-   pop r12
-   pop rbx
-
-   mov rsp, rbp
-   pop rbp
-   ret
+	ub_for:
+	   cmp r13d, DIMMATRIX
+	   jge ub_show_score
+	
+	   mov r14d, 17        ; colScreenAux = 17
+	   xor r15d, r15d      ; j = 0
+	
+		ub_inner_for:
+		   cmp r15d, DIMMATRIX
+		   jge ub_for_inc
+		
+		   mov eax, r13d
+		   imul eax, DIMMATRIX
+		   add eax, r15d
+		   cdqe
+		
+		   movsxd rdx, dword [rbx + rax*4]   ; rdx = (long)m[i][j]
+		
+		   mov edi, r12d       ; rowScreenAux
+		   mov esi, r14d       ; colScreenAux
+		   call showNumberP2
+		
+		   add r14d, 9
+		   inc r15d
+		   jmp ub_inner_for
+		
+	ub_for_inc:
+	   add r12d, 2
+	   inc r13d
+	   jmp ub_for
+	
+	ub_show_score:
+	   pop rdx             ; rdx = saved score
+	
+	   mov edi, 18
+	   mov esi, 35
+	   call showNumberP2
+	
+	   mov edi, 18
+	   mov esi, 36
+	   call gotoxyP2
+	
+	ub_end:
+	   ;restaurar el estado de los registros que se han guardado en la pila.
+	
+	   ;no pop rsi so we don't lose the score
+	   pop r15
+	   pop r14
+	   pop r13
+	   pop r12
+	   pop rbx
+	
+	   mov rsp, rbp
+	   pop rbp
+	   ret
 ;;;;;  
 ; Copiar la matriz origen (mOrigin) -segundo parámetro- sobre la matriz
 ; destino (mDest) -primer parámetro-.
@@ -723,6 +723,7 @@ shiftNumbersLP2:
    shn_end:                    
    mov eax, ecx
    ;restaurar el estado de los registros que se han guardado en la pila.    
+   pop r15
    pop r14
    pop r13
    pop r12
@@ -822,9 +823,6 @@ addPairsLP2:
    		inc r12d
 		jmp ap_for
    ap_after_for:
-   		cmp r14d, 0
-		jle ap_end
-
 		mov eax, r14d
    ap_end:                         ;return p;
    ;restaurar el estado de los registros que se han guardado en la pila.
