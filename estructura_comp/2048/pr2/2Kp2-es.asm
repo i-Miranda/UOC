@@ -351,7 +351,7 @@ updateBoardP2:
    mov  rbp, rsp
    ;guardamos el estado de los registros del procesador porque
    ;las funciones de C no mantienen el estado de los registros.
-
+   push rdx
    push rbx            ; rbx = m
    push r12            ; r12d = rowScreenAux
    push r13            ; r13d = i
@@ -396,7 +396,7 @@ updateBoardP2:
 	   jmp ub_for
 	
 	ub_show_score:
-	   pop rdx             ; rdx = saved score
+	   mov rdx, [rsp]             ; rdx = saved score
 	
 	   mov edi, 18
 	   mov esi, 35
@@ -408,13 +408,13 @@ updateBoardP2:
 	
 	ub_end:
 	   ;restaurar el estado de los registros que se han guardado en la pila.
-	
-	   ;no pop rsi so we don't lose the score
+	   pop rsi
 	   pop r15
 	   pop r14
 	   pop r13
 	   pop r12
 	   pop rbx
+	   pop rdx
 	
 	   mov rsp, rbp
 	   pop rbp
