@@ -825,8 +825,8 @@ addPairsLP2:
 
 		mov eax, r14d
 		cdqe
-		add qword [score], rax
-		mov word [state], 2
+		add r10, rax
+		mov r8w, 2
    ap_end:                         ;return p;
    ;restaurar el estado de los registros que se han guardado en la pila.
    pop r15
